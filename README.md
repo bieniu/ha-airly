@@ -7,13 +7,13 @@ sensor:
     api_key: !secret airly_api_key
 ```
 
-## Configuration example
+## Custom configuration example
 ```yaml
 sensor:
   - platform: airly
     api_key: !secret airly_api_key
-    latitude: 51.1084
-    longitude: 22.7406
+    latitude: !secret latitude
+    longitude: !secret longitude
     scan_interval: 300
     monitored_conditions:
       - pm1
