@@ -1,5 +1,12 @@
 # Airly
 
+## Minimal configuration
+```yaml
+sensor:
+  - platform: airly
+    api_key: !secret airly_api_key
+```
+
 ## Configuration example
 ```yaml
 sensor:
