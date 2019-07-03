@@ -17,7 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.2.0'
+__VERSION__ = '0.2.1'
 
 CONF_LANGUAGE = 'language'
 
@@ -55,6 +55,7 @@ ATTR_CAQI = 'caqi'
 ATTR_CAQI_LEVEL = 'level'
 ATTR_CAQI_DESCRIPTION = 'description'
 ATTR_CAQI_ADVICE = 'advice'
+ATTR_DATA_AVAILABLE = 'data_available'
 
 SENSOR_TYPES = {
     ATTR_PM1: [LABEL_PM1, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
@@ -132,18 +133,20 @@ class AirlySensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
-        if self.type == ATTR_CAQI_DESCRIPTION:
-            self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
-        if self.type == ATTR_CAQI:
-            self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
-        if self.type == ATTR_PM25:
-            self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
-            self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                    [ATTR_PM25_PERCENT]))
-        if self.type == ATTR_PM10:
-            self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
-            self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                    [ATTR_PM10_PERCENT]))
+        if self.airly.data[ATTR_DATA_AVAILABLE]:
+            if self.type == ATTR_CAQI_DESCRIPTION:
+                self._attrs[ATTR_CAQI_ADVICE] = (self.airly.data
+                        [ATTR_CAQI_ADVICE])
+            if self.type == ATTR_CAQI:
+                self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
+            if self.type == ATTR_PM25:
+                self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
+                self._attrs[ATTR_PERCENT] = (round(self.airly.data
+                        [ATTR_PM25_PERCENT]))
+            if self.type == ATTR_PM10:
+                self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
+                self._attrs[ATTR_PERCENT] = (round(self.airly.data
+                        [ATTR_PM10_PERCENT]))
         return self._attrs
 
     @property
@@ -154,17 +157,18 @@ class AirlySensor(Entity):
     @property
     def icon(self):
         """Return the icon."""
-        if self.type == ATTR_CAQI:
-            if self._state <= 25:
-                return 'mdi:emoticon-excited'
-            elif self._state <= 50:
-                return 'mdi:emoticon-happy'
-            elif self._state <= 75:
-                return 'mdi:emoticon-neutral'
-            elif self._state <= 100:
-                return 'mdi:emoticon-sad'
-            elif self._state > 100:
-                return 'mdi:emoticon-dead'
+        if self.airly.data[ATTR_DATA_AVAILABLE]:
+            if self.type == ATTR_CAQI:
+                if self._state <= 25:
+                    return 'mdi:emoticon-excited'
+                elif self._state <= 50:
+                    return 'mdi:emoticon-happy'
+                elif self._state <= 75:
+                    return 'mdi:emoticon-neutral'
+                elif self._state <= 100:
+                    return 'mdi:emoticon-sad'
+                elif self._state > 100:
+                    return 'mdi:emoticon-dead'
         return SENSOR_TYPES[self.type][2]
 
     @property
@@ -188,13 +192,13 @@ class AirlySensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        if self.airly is not None:
+        if self.airly.data[ATTR_DATA_AVAILABLE]:
             self._state = self.airly.data[self.type]
-        if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
-                          ATTR_CAQI]:
-            self._state = round(self._state)
-        if self.type in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
-            self._state = round(self._state, 1)
+            if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
+                            ATTR_CAQI]:
+                self._state = round(self._state)
+            if self.type in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
+                self._state = round(self._state, 1)
         return self._state
 
     @property
@@ -217,6 +221,8 @@ class AirlyData:
         self.language = language
         self.api_key = api_key
         self.data = {}
+        
+        self.data[ATTR_DATA_AVAILABLE] = False
 
         self.async_update = Throttle(
             kwargs[CONF_SCAN_INTERVAL])(self._async_update)
@@ -239,31 +245,36 @@ class AirlyData:
         elif request.status_code == 500:
             _LOGGER.error("Can't retrieve data: internal server error")
         elif request.status_code == HTTP_OK and request.content.__len__() > 0:
-            self.data[ATTR_PM1] = (request.json()['current']['values'][0]
-                    ['value'])
-            self.data[ATTR_PM25] = (request.json()['current']['values'][1]
-                    ['value'])
-            self.data[ATTR_PM25_LIMIT] = (request.json()['current']['standards']
-                    [0]['limit'])
-            self.data[ATTR_PM25_PERCENT] = (request.json()['current']
-                    ['standards'][0]['percent'])
-            self.data[ATTR_PM10] = (request.json()['current']['values'][2]
-                    ['value'])
-            self.data[ATTR_PM10_LIMIT] = (request.json()['current']['standards']
-                    [1]['limit'])
-            self.data[ATTR_PM10_PERCENT] = (request.json()['current']
-                    ['standards'][1]['percent'])
-            self.data[ATTR_PRESSURE] = (request.json()['current']['values'][3]
-                    ['value'])
-            self.data[ATTR_HUMIDITY] = (request.json()['current']['values'][4]
-                    ['value'])
-            self.data[ATTR_TEMPERATURE] = (request.json()['current']['values']
-                    [5]['value'])
-            self.data[ATTR_CAQI] = (request.json()['current']['indexes'][0]
-                    ['value'])
-            self.data[ATTR_CAQI_LEVEL] = (request.json()['current']['indexes']
-                    [0]['level'].lower().replace('_', ' '))
-            self.data[ATTR_CAQI_DESCRIPTION] = (request.json()['current']
-                    ['indexes'][0]['description'])
-            self.data[ATTR_CAQI_ADVICE] = (request.json()['current']['indexes']
-                    [0]['advice'])
+            if request.json()['current']['indexes'][0]['value']:
+                self.data[ATTR_PM1] = (request.json()['current']['values'][0]
+                        ['value'])
+                self.data[ATTR_PM25] = (request.json()['current']['values'][1]
+                        ['value'])
+                self.data[ATTR_PM25_LIMIT] = (request.json()['current']
+                        ['standards'][0]['limit'])
+                self.data[ATTR_PM25_PERCENT] = (request.json()['current']
+                        ['standards'][0]['percent'])
+                self.data[ATTR_PM10] = (request.json()['current']['values'][2]
+                        ['value'])
+                self.data[ATTR_PM10_LIMIT] = (request.json()['current']
+                        ['standards'][1]['limit'])
+                self.data[ATTR_PM10_PERCENT] = (request.json()['current']
+                        ['standards'][1]['percent'])
+                self.data[ATTR_PRESSURE] = (request.json()['current']['values']
+                        [3]['value'])
+                self.data[ATTR_HUMIDITY] = (request.json()['current']['values']
+                        [4]['value'])
+                self.data[ATTR_TEMPERATURE] = (request.json()['current']
+                        ['values'][5]['value'])
+                self.data[ATTR_CAQI] = (request.json()['current']['indexes'][0]
+                        ['value'])
+                self.data[ATTR_CAQI_LEVEL] = (request.json()['current']
+                        ['indexes'][0]['level'].lower().replace('_', ' '))
+                self.data[ATTR_CAQI_DESCRIPTION] = (request.json()['current']
+                        ['indexes'][0]['description'])
+                self.data[ATTR_CAQI_ADVICE] = (request.json()['current']
+                        ['indexes'][0]['advice'])
+                self.data[ATTR_DATA_AVAILABLE] = True
+            else:
+                _LOGGER.error("Can't retrieve data: " \
+                              "no Airly sensors in this area")
