@@ -13,10 +13,11 @@ from homeassistant.const import (
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
+from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.1.0'
+__VERSION__ = '0.2.0'
 
 CONF_LANGUAGE = 'language'
 
@@ -93,54 +94,56 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(
+        hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
 
     name = config.get(CONF_NAME)
-    token = config.get(CONF_API_KEY)
     latitude = config.get(CONF_LATITUDE, hass.config.latitude)
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     language = config.get(CONF_LANGUAGE)
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
-    scan_interval = config[CONF_SCAN_INTERVAL]
+
+    data = AirlyData(config.get(CONF_API_KEY), latitude, longitude, language,
+                     scan_interval=config[CONF_SCAN_INTERVAL])
+
+    await data.async_update()
+
     sensors = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
-        sensors.append(AirlySensor(name, variable, latitude, longitude, token,
-                                   language))
-    add_entities(sensors, True)
+        sensors.append(AirlySensor(data, name, variable, language))
+    async_add_entities(sensors, True)
 
 
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, name, type, latitude, longitude, token, language):
+    def __init__(self, airly, name, type, language):
         """Initialize."""
         self._name = name
-        self.latitude = latitude
-        self.longitude = longitude
         self.type = type
-        self.token = token
-        self.data = None
-        self.language = language
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION[language]}
         self._device_class = None
         self._icon = None
         self._unit_of_measurement = None
+        self.airly = airly
 
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
         if self.type == ATTR_CAQI_DESCRIPTION:
-            self._attrs[ATTR_CAQI_ADVICE] = self.data[ATTR_CAQI_ADVICE]
+            self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
         if self.type == ATTR_CAQI:
-            self._attrs[ATTR_CAQI_LEVEL] = self.data[ATTR_CAQI_LEVEL]
+            self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
         if self.type == ATTR_PM25:
-            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM25_LIMIT]
-            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM25_PERCENT])
+            self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
+            self._attrs[ATTR_PERCENT] = (round(self.airly.data
+                    [ATTR_PM25_PERCENT]))
         if self.type == ATTR_PM10:
-            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM10_LIMIT]
-            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM10_PERCENT])
+            self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
+            self._attrs[ATTR_PERCENT] = (round(self.airly.data
+                    [ATTR_PM10_PERCENT]))
         return self._attrs
 
     @property
@@ -179,13 +182,14 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return '{}-{}-{}'.format(self.latitude, self.longitude, self.type)
+        return '{}-{}-{}'.format(self.airly.latitude, self.airly.longitude,
+                                 self.type)
 
     @property
     def state(self):
         """Return the state."""
-        if self.data is not None:
-            self._state = self.data[self.type]
+        if self.airly is not None:
+            self._state = self.airly.data[self.type]
         if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
                           ATTR_CAQI]:
             self._state = round(self._state)
@@ -198,18 +202,35 @@ class AirlySensor(Entity):
         """Return the unit the value is expressed in."""
         return SENSOR_TYPES[self.type][1]
 
-    def update(self):
+    async def async_update(self):
         """Get the data from Airly."""
+        await self.airly.async_update()
+
+
+class AirlyData:
+    """Define an object to hold sensor data."""
+
+    def __init__(self, api_key, latitude, longitude, language, **kwargs):
+        """Initialize."""
+        self.latitude = latitude
+        self.longitude = longitude
+        self.language = language
+        self.api_key = api_key
+        self.data = {}
+
+        self.async_update = Throttle(
+            kwargs[CONF_SCAN_INTERVAL])(self._async_update)
+
+    async def _async_update(self):
+        """Update Airly data."""
         url = 'https://airapi.airly.eu/v2/measurements/point' \
               '?lat={}&lng={}&maxDistanceKM=2'.format(self.latitude,
                                                       self.longitude)
-        headers = {'Accept': CONTENT_TYPE_JSON, 'apikey': self.token,
+        headers = {'Accept': CONTENT_TYPE_JSON, 'apikey': self.api_key,
                    'Accept-Language': self.language}
         request = requests.get(url, headers=headers)
         _LOGGER.debug("New data retrieved: %s", request.status_code)
-        if request.status_code == HTTP_OK and request.content.__len__() > 0:
-            self.get_data(request.json())
-        elif request.status_code == 400:
+        if request.status_code == 400:
             _LOGGER.error("Can't retrieve data: bad request")
         elif request.status_code == 401:
             _LOGGER.error("Can't retrieve data: unauthorized")
@@ -217,33 +238,32 @@ class AirlySensor(Entity):
             _LOGGER.error("Can't retrieve data: too many requests")
         elif request.status_code == 500:
             _LOGGER.error("Can't retrieve data: internal server error")
-
-    def get_data(self, data):
-        """
-        Return a new state based on the type.
-        """
-        self.data = {}
-        self.data[ATTR_PM1] = data['current']['values'][0]['value']
-        self.data[ATTR_PM25] = data['current']['values'][1]['value']
-        self.data[ATTR_PM25_LIMIT] = data['current']['standards'][0]['limit']
-        self.data[ATTR_PM25_PERCENT] = (data['current']['standards'][0]
-                                        ['percent'])
-        self.data[ATTR_PM10] = data['current']['values'][2]['value']
-        self.data[ATTR_PM10_LIMIT] = data['current']['standards'][1]['limit']
-        self.data[ATTR_PM10_PERCENT] = (data['current']['standards'][1]
-                                        ['percent'])
-        self.data[ATTR_PRESSURE] = data['current']['values'][3]['value']
-        self.data[ATTR_HUMIDITY] = data['current']['values'][4]['value']
-        self.data[ATTR_TEMPERATURE] = data['current']['values'][5]['value']
-        self.data[ATTR_CAQI] = data['current']['indexes'][0]['value']
-        self.data[ATTR_CAQI_LEVEL] = (data['current']['indexes'][0]
-                                      ['level'].lower().replace('_', ' '))
-        self.data[ATTR_CAQI_DESCRIPTION] = (data['current']['indexes'][0]
-                                                ['description'])
-        self.data[ATTR_CAQI_ADVICE] = (data['current']['indexes'][0]
-                                                ['advice'])
-
-
-
-
-
+        elif request.status_code == HTTP_OK and request.content.__len__() > 0:
+            self.data[ATTR_PM1] = (request.json()['current']['values'][0]
+                    ['value'])
+            self.data[ATTR_PM25] = (request.json()['current']['values'][1]
+                    ['value'])
+            self.data[ATTR_PM25_LIMIT] = (request.json()['current']['standards']
+                    [0]['limit'])
+            self.data[ATTR_PM25_PERCENT] = (request.json()['current']
+                    ['standards'][0]['percent'])
+            self.data[ATTR_PM10] = (request.json()['current']['values'][2]
+                    ['value'])
+            self.data[ATTR_PM10_LIMIT] = (request.json()['current']['standards']
+                    [1]['limit'])
+            self.data[ATTR_PM10_PERCENT] = (request.json()['current']
+                    ['standards'][1]['percent'])
+            self.data[ATTR_PRESSURE] = (request.json()['current']['values'][3]
+                    ['value'])
+            self.data[ATTR_HUMIDITY] = (request.json()['current']['values'][4]
+                    ['value'])
+            self.data[ATTR_TEMPERATURE] = (request.json()['current']['values']
+                    [5]['value'])
+            self.data[ATTR_CAQI] = (request.json()['current']['indexes'][0]
+                    ['value'])
+            self.data[ATTR_CAQI_LEVEL] = (request.json()['current']['indexes']
+                    [0]['level'].lower().replace('_', ' '))
+            self.data[ATTR_CAQI_DESCRIPTION] = (request.json()['current']
+                    ['indexes'][0]['description'])
+            self.data[ATTR_CAQI_ADVICE] = (request.json()['current']['indexes']
+                    [0]['advice'])
