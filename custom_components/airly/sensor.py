@@ -17,7 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.2.1'
+__VERSION__ = '0.2.2'
 
 CONF_LANGUAGE = 'language'
 
@@ -55,7 +55,6 @@ ATTR_CAQI = 'caqi'
 ATTR_CAQI_LEVEL = 'level'
 ATTR_CAQI_DESCRIPTION = 'description'
 ATTR_CAQI_ADVICE = 'advice'
-ATTR_DATA_AVAILABLE = 'data_available'
 
 SENSOR_TYPES = {
     ATTR_PM1: [LABEL_PM1, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
@@ -133,7 +132,7 @@ class AirlySensor(Entity):
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
-        if self.airly.data[ATTR_DATA_AVAILABLE]:
+        if self.airly.data_available:
             if self.type == ATTR_CAQI_DESCRIPTION:
                 self._attrs[ATTR_CAQI_ADVICE] = (self.airly.data
                         [ATTR_CAQI_ADVICE])
@@ -157,7 +156,7 @@ class AirlySensor(Entity):
     @property
     def icon(self):
         """Return the icon."""
-        if self.airly.data[ATTR_DATA_AVAILABLE]:
+        if self.airly.data_available:
             if self.type == ATTR_CAQI:
                 if self._state <= 25:
                     return 'mdi:emoticon-excited'
@@ -192,7 +191,7 @@ class AirlySensor(Entity):
     @property
     def state(self):
         """Return the state."""
-        if self.airly.data[ATTR_DATA_AVAILABLE]:
+        if self.airly.data_available:
             self._state = self.airly.data[self.type]
             if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
                             ATTR_CAQI]:
@@ -220,9 +219,8 @@ class AirlyData:
         self.longitude = longitude
         self.language = language
         self.api_key = api_key
+        self.data_available = False
         self.data = {}
-        
-        self.data[ATTR_DATA_AVAILABLE] = False
 
         self.async_update = Throttle(
             kwargs[CONF_SCAN_INTERVAL])(self._async_update)
@@ -274,7 +272,7 @@ class AirlyData:
                         ['indexes'][0]['description'])
                 self.data[ATTR_CAQI_ADVICE] = (request.json()['current']
                         ['indexes'][0]['advice'])
-                self.data[ATTR_DATA_AVAILABLE] = True
+                self.data_available = True
             else:
                 _LOGGER.error("Can't retrieve data: " \
                               "no Airly sensors in this area")
