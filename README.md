@@ -1,4 +1,5 @@
 # Airly
+The component collects data from Airly API to present air quality data as sensors in Home Assitant.
 
 ## Minimal configuration
 ```yaml
