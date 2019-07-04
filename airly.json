@@ -1,0 +1,13 @@
+{
+    "airly": {
+        "changelog": "https://github.com/bieniu/ha-airly/releases",
+        "local_location": "/custom_components/airly/sensor.py",
+        "remote_location": "https://raw.githubusercontent.com/bieniu/ha-airly/master/custom_components/airly/sensor.py",
+        "resources": [
+            "https://raw.githubusercontent.com/bieniu/ha-airly/master/custom_components/airly/manifest.json.py"
+        ],
+        "updated_at": "2019-07-04",
+        "version": "0.2.3",
+        "visit_repo": "https://github.com/bieniu/ha-airly"
+    }
+}

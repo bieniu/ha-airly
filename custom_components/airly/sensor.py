@@ -17,7 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.2.2'
+__VERSION__ = '0.2.3'
 
 CONF_LANGUAGE = 'language'
 
@@ -228,8 +228,7 @@ class AirlyData:
     async def _async_update(self):
         """Update Airly data."""
         url = 'https://airapi.airly.eu/v2/measurements/point' \
-              '?lat={}&lng={}&maxDistanceKM=2'.format(self.latitude,
-                                                      self.longitude)
+              '?lat={}&lng={}'.format(self.latitude, self.longitude)
         headers = {'Accept': CONTENT_TYPE_JSON, 'apikey': self.api_key,
                    'Accept-Language': self.language}
         request = requests.get(url, headers=headers)

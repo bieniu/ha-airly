@@ -1,7 +1,7 @@
 {
     "domain": "airly",
     "name": "Airly",
-    "documentation": "https://github.com/bieniu/ha-airly-component",
+    "documentation": "https://github.com/bieniu/ha-airly",
     "dependencies": [],
     "codeowners": ["@bieniu"],
     "requirements": []
