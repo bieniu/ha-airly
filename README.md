@@ -28,7 +28,7 @@ sensor:
       - description
 ```
 
-## Configuration
+## Arguments
 
 key | optional | type | default | description
 -- | -- | -- | -- | --
