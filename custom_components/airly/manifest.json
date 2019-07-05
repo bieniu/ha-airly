@@ -3,6 +3,8 @@
     "name": "Airly",
     "documentation": "https://github.com/bieniu/ha-airly",
     "dependencies": [],
-    "codeowners": ["@bieniu"],
+    "codeowners": [
+        "@bieniu"
+    ],
     "requirements": []
-  }
+}
