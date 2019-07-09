@@ -1,6 +1,6 @@
 from datetime import timedelta
 import logging
-import requests
+import aiohttp
 
 import voluptuous as vol
 
@@ -17,7 +17,9 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.2.3'
+__VERSION__ = '0.3.0'
+
+URL = 'https://airapi.airly.eu/v2/measurements/point?lat={}&lng={}'
 
 CONF_LANGUAGE = 'language'
 
@@ -227,51 +229,44 @@ class AirlyData:
 
     async def _async_update(self):
         """Update Airly data."""
-        url = 'https://airapi.airly.eu/v2/measurements/point' \
-              '?lat={}&lng={}'.format(self.latitude, self.longitude)
-        headers = {'Accept': CONTENT_TYPE_JSON, 'apikey': self.api_key,
-                   'Accept-Language': self.language}
-        request = requests.get(url, headers=headers)
-        _LOGGER.debug("New data retrieved: %s", request.status_code)
-        if request.status_code == 400:
-            _LOGGER.error("Can't retrieve data: bad request")
-        elif request.status_code == 401:
-            _LOGGER.error("Can't retrieve data: unauthorized")
-        elif request.status_code == 429:
-            _LOGGER.error("Can't retrieve data: too many requests")
-        elif request.status_code == 500:
-            _LOGGER.error("Can't retrieve data: internal server error")
-        elif request.status_code == HTTP_OK and request.content.__len__() > 0:
-            if request.json()['current']['indexes'][0]['value']:
-                self.data[ATTR_PM1] = (request.json()['current']['values'][0]
-                        ['value'])
-                self.data[ATTR_PM25] = (request.json()['current']['values'][1]
-                        ['value'])
-                self.data[ATTR_PM25_LIMIT] = (request.json()['current']
-                        ['standards'][0]['limit'])
-                self.data[ATTR_PM25_PERCENT] = (request.json()['current']
-                        ['standards'][0]['percent'])
-                self.data[ATTR_PM10] = (request.json()['current']['values'][2]
-                        ['value'])
-                self.data[ATTR_PM10_LIMIT] = (request.json()['current']
-                        ['standards'][1]['limit'])
-                self.data[ATTR_PM10_PERCENT] = (request.json()['current']
-                        ['standards'][1]['percent'])
-                self.data[ATTR_PRESSURE] = (request.json()['current']['values']
-                        [3]['value'])
-                self.data[ATTR_HUMIDITY] = (request.json()['current']['values']
-                        [4]['value'])
-                self.data[ATTR_TEMPERATURE] = (request.json()['current']
-                        ['values'][5]['value'])
-                self.data[ATTR_CAQI] = (request.json()['current']['indexes'][0]
-                        ['value'])
-                self.data[ATTR_CAQI_LEVEL] = (request.json()['current']
-                        ['indexes'][0]['level'].lower().replace('_', ' '))
-                self.data[ATTR_CAQI_DESCRIPTION] = (request.json()['current']
-                        ['indexes'][0]['description'])
-                self.data[ATTR_CAQI_ADVICE] = (request.json()['current']
-                        ['indexes'][0]['advice'])
-                self.data_available = True
-            else:
-                _LOGGER.error("Can't retrieve data: " \
-                              "no Airly sensors in this area")
+        headers = {'Accept': CONTENT_TYPE_JSON}
+        headers.update({'apikey': self.api_key})
+        headers.update({'Accept-Language': self.language})
+        try:
+            async with aiohttp.ClientSession(headers=headers) as session:
+                async with session.get(URL.format(self.latitude,
+                                                self.longitude)) as resp:
+                    jsondata = await resp.json()
+            _LOGGER.debug("New data retrieved: %s", resp.status)
+            if resp.status == 400:
+                _LOGGER.error("Can't retrieve data: bad request")
+            elif resp.status == 401:
+                _LOGGER.error("Can't retrieve data: unauthorized")
+            elif resp.status == 429:
+                _LOGGER.error("Can't retrieve data: too many requests")
+            elif resp.status == 500:
+                _LOGGER.error("Can't retrieve data: internal server error")
+            elif resp.status == HTTP_OK > 0:
+                jsondata = jsondata['current']
+                if jsondata['indexes'][0]['value']:
+                    for i in range(len(jsondata['values'])):
+                        self.data[jsondata['values'][i]['name'].lower()] = \
+                                jsondata['values'][i]['value']
+                    self.data[ATTR_PM25_LIMIT] = jsondata['standards'][0]['limit']
+                    self.data[ATTR_PM25_PERCENT] = (jsondata['standards'][0]
+                            ['percent'])
+                    self.data[ATTR_PM10_LIMIT] = jsondata['standards'][1]['limit']
+                    self.data[ATTR_PM10_PERCENT] = (jsondata['standards'][1]
+                            ['percent'])
+                    self.data[ATTR_CAQI] = jsondata['indexes'][0]['value']
+                    self.data[ATTR_CAQI_LEVEL] = (jsondata['indexes'][0]
+                            ['level'].lower().replace('_', ' '))
+                    self.data[ATTR_CAQI_DESCRIPTION] = (jsondata['indexes'][0]
+                            ['description'])
+                    self.data[ATTR_CAQI_ADVICE] = jsondata['indexes'][0]['advice']
+                    self.data_available = True
+                else:
+                    _LOGGER.error("Can't retrieve data: no Airly sensors in this " \
+                            "area")
+        except Exception as exception:
+            _LOGGER.error(exception)

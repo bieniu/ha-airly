@@ -6,8 +6,8 @@
         "resources": [
             "https://raw.githubusercontent.com/bieniu/ha-airly/master/custom_components/airly/manifest.json"
         ],
-        "updated_at": "2019-07-04",
-        "version": "0.2.3",
+        "updated_at": "2019-07-09",
+        "version": "0.3.0",
         "visit_repo": "https://github.com/bieniu/ha-airly"
     }
 }
