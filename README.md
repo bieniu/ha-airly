@@ -3,6 +3,8 @@
 
 The component collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
 
+To generate `api key` go to [Airly for developers](https://developer.airly.eu/register)
+
 ## Minimal configuration
 ```yaml
 sensor:
