@@ -1,7 +1,7 @@
 # Airly
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
-The component collects data about air quality from [Airly](https://airly.eu) and present this data as sensors in Home Assitant.
+The component collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
 
 ## Minimal configuration
 ```yaml
