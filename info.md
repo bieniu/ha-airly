@@ -1,3 +1,6 @@
+## API Key
+To generate `api key` go to [Airly for developers](https://developer.airly.eu/register) page.
+
 ## Minimal configuration
 ```yaml
 sensor:
@@ -35,5 +38,3 @@ key | optional | type | default | description
 `language` | True | string | `en` | language, available `en` and `pl`
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
 `monitored_conditions` | True | list | `pm1, pm25, pm10` | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
-
-To generate `api key` go to [Airly for developers](https://developer.airly.eu/register) page.
