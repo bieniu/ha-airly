@@ -246,7 +246,7 @@ class AirlyData:
                 _LOGGER.error("Can't retrieve data: too many requests")
             elif resp.status == 500:
                 _LOGGER.error("Can't retrieve data: internal server error")
-            elif resp.status == HTTP_OK > 0:
+            elif resp.status == HTTP_OK:
                 jsondata = jsondata['current']
                 if jsondata['indexes'][0]['value']:
                     for i in range(len(jsondata['values'])):
