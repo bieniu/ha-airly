@@ -46,4 +46,4 @@ key | optional | type | default | description
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
 `monitored_conditions` | True | list | `pm1, pm25, pm10` | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
 
-[releases]: https://github.com/bieniu/ha-airly/releases
+[releases]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
