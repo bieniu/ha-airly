@@ -52,5 +52,3 @@ key | optional | type | default | description
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
 [forum]: https://community.home-assistant.io/t/airly-integration-air-quality-data/124996
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
-[hacs]: https://github.com/custom-components/hacs
-[hacs-sield]: https://img.shields.io/badge/HACS-Default-orange.svg
