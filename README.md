@@ -1,6 +1,9 @@
 # Airly
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
+[![GitHub Release][releases-shield]][releases]
+[![License][license-shield]](LICENSE.md)
+![Project Maintenance][maintenance-shield]
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 The component collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
