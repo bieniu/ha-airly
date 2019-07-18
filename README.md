@@ -1,6 +1,6 @@
 # Airly
-[![hacs_badge]([hacs-shield])]([hacs])
 [![GitHub Release][releases-shield]][releases]
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![Community Forum][forum-shield]][forum]
 
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
