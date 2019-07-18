@@ -1,5 +1,5 @@
 # Airly
-[![hacs_badge][hacs-shield]][hacs]
+[![hacs_badge]([hacs-shield])]([hacs])
 [![GitHub Release][releases-shield]][releases]
 [![Community Forum][forum-shield]][forum]
 
