@@ -1,6 +1,6 @@
 # Airly
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![GitHub Release](https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout)][releases]
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
@@ -45,5 +45,3 @@ key | optional | type | default | description
 `language` | True | string | `en` | language, available `en` and `pl`
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
 `monitored_conditions` | True | list | `pm1, pm25, pm10` | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
-
-[releases]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
