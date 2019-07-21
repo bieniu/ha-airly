@@ -17,7 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.3.0'
+__VERSION__ = '0.3.1'
 
 URL = 'https://airapi.airly.eu/v2/measurements/point?lat={}&lng={}'
 
