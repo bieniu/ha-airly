@@ -17,9 +17,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.3.0'
-
-URL = 'https://airapi.airly.eu/v2/measurements/point?lat={}&lng={}'
+__VERSION__ = '0.4.0dev'
 
 CONF_LANGUAGE = 'language'
 
@@ -229,44 +227,34 @@ class AirlyData:
 
     async def _async_update(self):
         """Update Airly data."""
-        headers = {'Accept': CONTENT_TYPE_JSON}
-        headers.update({'apikey': self.api_key})
-        headers.update({'Accept-Language': self.language})
-        try:
-            async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.get(URL.format(self.latitude,
-                                                self.longitude)) as resp:
-                    jsondata = await resp.json()
-            _LOGGER.debug("New data retrieved: %s", resp.status)
-            if resp.status == 400:
-                _LOGGER.error("Can't retrieve data: bad request")
-            elif resp.status == 401:
-                _LOGGER.error("Can't retrieve data: unauthorized")
-            elif resp.status == 429:
-                _LOGGER.error("Can't retrieve data: too many requests")
-            elif resp.status == 500:
-                _LOGGER.error("Can't retrieve data: internal server error")
-            elif resp.status == HTTP_OK:
-                jsondata = jsondata['current']
-                if jsondata['indexes'][0]['value']:
-                    for i in range(len(jsondata['values'])):
-                        self.data[jsondata['values'][i]['name'].lower()] = \
-                                jsondata['values'][i]['value']
-                    self.data[ATTR_PM25_LIMIT] = jsondata['standards'][0]['limit']
-                    self.data[ATTR_PM25_PERCENT] = (jsondata['standards'][0]
-                            ['percent'])
-                    self.data[ATTR_PM10_LIMIT] = jsondata['standards'][1]['limit']
-                    self.data[ATTR_PM10_PERCENT] = (jsondata['standards'][1]
-                            ['percent'])
-                    self.data[ATTR_CAQI] = jsondata['indexes'][0]['value']
-                    self.data[ATTR_CAQI_LEVEL] = (jsondata['indexes'][0]
-                            ['level'].lower().replace('_', ' '))
-                    self.data[ATTR_CAQI_DESCRIPTION] = (jsondata['indexes'][0]
-                            ['description'])
-                    self.data[ATTR_CAQI_ADVICE] = jsondata['indexes'][0]['advice']
-                    self.data_available = True
-                else:
-                    _LOGGER.error("Can't retrieve data: no Airly sensors in this " \
-                            "area")
-        except Exception as exception:
-            _LOGGER.error(exception)
+        from airly import Airly
+        async with aiohttp.ClientSession() as http_session:
+            _LOGGER.debug("Retrieving data from Airly...")
+            airly = Airly(self.api_key, http_session, language=self.language)
+            measurements = airly.create_measurements_session_point(
+                self.latitude,
+                self.longitude
+            )
+            await measurements.update()
+            current = measurements.current
+
+            if current['indexes'][0]['value']:
+                for i in range(len(current['values'])):
+                    self.data[current['values'][i]['name'].lower()] = \
+                            current['values'][i]['value']
+                self.data[ATTR_PM25_LIMIT] = current['standards'][0]['limit']
+                self.data[ATTR_PM25_PERCENT] = (current['standards'][0]
+                        ['percent'])
+                self.data[ATTR_PM10_LIMIT] = current['standards'][1]['limit']
+                self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
+                        ['percent'])
+                self.data[ATTR_CAQI] = current['indexes'][0]['value']
+                self.data[ATTR_CAQI_LEVEL] = (current['indexes'][0]
+                        ['level'].lower().replace('_', ' '))
+                self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
+                        ['description'])
+                self.data[ATTR_CAQI_ADVICE] = current['indexes'][0]['advice']
+                self.data_available = True
+            else:
+                _LOGGER.error("Can't retrieve data: no Airly sensors in this " \
+                        "area")

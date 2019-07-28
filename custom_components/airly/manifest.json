@@ -6,5 +6,5 @@
     "codeowners": [
         "@bieniu"
     ],
-    "requirements": []
+    "requirements": ["airly==0.0.2"]
 }
