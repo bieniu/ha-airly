@@ -18,7 +18,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.4.0dev'
+__VERSION__ = '0.4.0'
 
 CONF_LANGUAGE = 'language'
 
