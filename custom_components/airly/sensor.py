@@ -1,6 +1,5 @@
 from datetime import timedelta
 import logging
-import aiohttp
 
 import voluptuous as vol
 
@@ -227,34 +226,38 @@ class AirlyData:
 
     async def _async_update(self):
         """Update Airly data."""
+        import aiohttp
         from airly import Airly
-        async with aiohttp.ClientSession() as http_session:
-            _LOGGER.debug("Retrieving data from Airly...")
-            airly = Airly(self.api_key, http_session, language=self.language)
-            measurements = airly.create_measurements_session_point(
-                self.latitude,
-                self.longitude
-            )
-            await measurements.update()
-            current = measurements.current
 
-            if current['indexes'][0]['value']:
-                for i in range(len(current['values'])):
-                    self.data[current['values'][i]['name'].lower()] = \
-                            current['values'][i]['value']
-                self.data[ATTR_PM25_LIMIT] = current['standards'][0]['limit']
-                self.data[ATTR_PM25_PERCENT] = (current['standards'][0]
-                        ['percent'])
-                self.data[ATTR_PM10_LIMIT] = current['standards'][1]['limit']
-                self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
-                        ['percent'])
-                self.data[ATTR_CAQI] = current['indexes'][0]['value']
-                self.data[ATTR_CAQI_LEVEL] = (current['indexes'][0]
-                        ['level'].lower().replace('_', ' '))
-                self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
-                        ['description'])
-                self.data[ATTR_CAQI_ADVICE] = current['indexes'][0]['advice']
-                self.data_available = True
-            else:
-                _LOGGER.error("Can't retrieve data: no Airly sensors in this " \
-                        "area")
+        try:
+            async with aiohttp.ClientSession() as http_session:
+                airly = Airly(self.api_key, http_session, language=self.language)
+                measurements = airly.create_measurements_session_point(
+                    self.latitude,
+                    self.longitude
+                )
+                await measurements.update()
+                current = measurements.current
+
+                if current['indexes'][0]['value']:
+                    for i in range(len(current['values'])):
+                        self.data[current['values'][i]['name'].lower()] = \
+                                current['values'][i]['value']
+                    self.data[ATTR_PM25_LIMIT] = current['standards'][0]['limit']
+                    self.data[ATTR_PM25_PERCENT] = (current['standards'][0]
+                            ['percent'])
+                    self.data[ATTR_PM10_LIMIT] = current['standards'][1]['limit']
+                    self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
+                            ['percent'])
+                    self.data[ATTR_CAQI] = current['indexes'][0]['value']
+                    self.data[ATTR_CAQI_LEVEL] = (current['indexes'][0]
+                            ['level'].lower().replace('_', ' '))
+                    self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
+                            ['description'])
+                    self.data[ATTR_CAQI_ADVICE] = current['indexes'][0]['advice']
+                    self.data_available = True
+                else:
+                    _LOGGER.error("Can't retrieve data: no Airly sensors in this " \
+                            "area")
+        except Exception as exception:
+            _LOGGER.error(exception)
