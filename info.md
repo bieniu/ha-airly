@@ -1,7 +1,7 @@
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 ## API Key
-To generate `api key` go to [Airly for developers](https://developer.airly.eu/register) page.
+To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
 
 ## Minimal configuration
 ```yaml

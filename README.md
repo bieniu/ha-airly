@@ -1,12 +1,14 @@
 # Airly
+[![GitHub Release][releases-shield]][releases]
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+[![Community Forum][forum-shield]][forum]
 
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 The component collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
 
-To generate `api key` go to [Airly for developers](https://developer.airly.eu/register) page.
-
+To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
+)
 ## Minimal configuration
 ```yaml
 sensor:
@@ -44,3 +46,9 @@ key | optional | type | default | description
 `language` | True | string | `en` | language, available `en` and `pl`
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
 `monitored_conditions` | True | list | `pm1, pm25, pm10` | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
+
+
+[releases]: https://github.com/bieniu/ha-airly/releases
+[releases-shield]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
+[forum]: https://community.home-assistant.io/t/airly-integration-air-quality-data/124996
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
