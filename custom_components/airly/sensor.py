@@ -16,18 +16,16 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
+from .const import DEFAULT_NAME, CONF_LANGUAGE, DEFAULT_LANGUAGE, LANGUAGE_CODES
+
 _LOGGER = logging.getLogger(__name__)
 
 __VERSION__ = '0.5.0'
 
-CONF_LANGUAGE = 'language'
-
-DEFAULT_NAME = 'Airly'
 DEFAULT_MONITORED_CONDITIONS = ['pm1', 'pm25', 'pm10']
 DEFAULT_ATTRIBUTION = {"en": "Data provided by Airly",
                        "pl": "Dane dostarczone przez Airly"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
-DEFAULT_LANGUAGE = 'en'
 
 LABEL_TEMPERATURE = 'Temperature'
 LABEL_HUMIDITY = 'Humidity'
@@ -69,21 +67,10 @@ SENSOR_TYPES = {
                             'mdi:card-text-outline']
 }
 
-# Language supported codes
-LANGUAGE_CODES = ['en', 'pl']
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_KEY, None): cv.string,
-    vol.Inclusive(
-        CONF_LATITUDE,
-        'coordinates',
-        'Latitude and longitude must exist together'
-    ): cv.latitude,
-    vol.Inclusive(
-        CONF_LONGITUDE,
-        'coordinates',
-        'Latitude and longitude must exist together'
-    ): cv.longitude,
+    vol.Required(CONF_LATITUDE): cv.latitude,
+    vol.Required(CONF_LONGITUDE): cv.longitude,
     vol.Optional(CONF_LANGUAGE,
                  default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
     vol.Optional(CONF_MONITORED_CONDITIONS,
