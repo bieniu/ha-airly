@@ -18,7 +18,7 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.4.0'
+__VERSION__ = '0.5.0'
 
 CONF_LANGUAGE = 'language'
 
@@ -117,6 +117,31 @@ async def async_setup_platform(
 
     sensors = []
     for condition in config[CONF_MONITORED_CONDITIONS]:
+        sensors.append(AirlySensor(data, name, condition, language))
+    async_add_entities(sensors, True)
+
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Add a Airly entities from a config_entry."""
+    api_key = config_entry.data[CONF_API_KEY]
+    name = config_entry.data[CONF_NAME]
+    latitude = config_entry.data[CONF_LATITUDE]
+    longitude = config_entry.data[CONF_LONGITUDE]
+    language = DEFAULT_LANGUAGE
+    scan_interval = DEFAULT_SCAN_INTERVAL
+    _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
+
+    data = AirlyData(
+        api_key,
+        latitude,
+        longitude,
+        language,
+        scan_interval=scan_interval
+    )
+
+    await data.async_update()
+
+    sensors = []
+    for condition in DEFAULT_MONITORED_CONDITIONS:
         sensors.append(AirlySensor(data, name, condition, language))
     async_add_entities(sensors, True)
 

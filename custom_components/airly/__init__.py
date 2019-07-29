@@ -2,6 +2,7 @@
 from homeassistant.core import Config, HomeAssistant
 from .config_flow import AirlyFlowHandler
 
+DOMAIN = 'airly'
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up configured Airly."""
@@ -9,7 +10,7 @@ async def async_setup(hass: HomeAssistant, config: Config) -> bool:
 
 
 async def async_setup_entry(hass, config_entry):
-    """Set up Met as config entry."""
+    """Set up Airly as config entry."""
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(
         config_entry, 'sensor'))
     return True
