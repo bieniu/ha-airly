@@ -1,0 +1,22 @@
+{
+    "config": {
+        "title": "Airly",
+        "step": {
+            "user": {
+                "title": "Airly",
+                "description": "Jeśli potrzebujesz pomocy z konfiguracją, przejdź na stronę: https://github.com/bieniu/ha-airly",
+                "data": {
+                    "name": "Nazwa integracji",
+                    "api_key": "Klucz API Airly",
+                    "latitude": "Szerokość geograficzna",
+                    "longitude": "Długość geograficzna",
+                    "language": "Język (en i pl są wspierane)"
+                }
+            }
+        },
+        "error": {
+            "name_exists": "Nazwa już istnieje",
+            "wrong_lang": "Jezyk nieobsługiwany"
+        }
+    }
+}
