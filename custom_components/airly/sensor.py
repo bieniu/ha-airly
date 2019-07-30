@@ -22,7 +22,6 @@ _LOGGER = logging.getLogger(__name__)
 
 __VERSION__ = '0.5.0'
 
-DEFAULT_MONITORED_CONDITIONS = [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_CAQI]
 DEFAULT_ATTRIBUTION = {"en": "Data provided by Airly",
                        "pl": "Dane dostarczone przez Airly"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
@@ -54,6 +53,9 @@ ATTR_CAQI = 'caqi'
 ATTR_CAQI_LEVEL = 'level'
 ATTR_CAQI_DESCRIPTION = 'description'
 ATTR_CAQI_ADVICE = 'advice'
+
+DEFAULT_MONITORED_CONDITIONS = [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_CAQI,
+                                ATTR_CAQI_DESCRIPTION]
 
 SENSOR_TYPES = {
     ATTR_PM1: [LABEL_PM1, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
@@ -114,7 +116,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     name = config_entry.data[CONF_NAME]
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
-    language = DEFAULT_LANGUAGE
+    language = config_entry.data[CONF_LANGUAGE]
     scan_interval = DEFAULT_SCAN_INTERVAL
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
@@ -242,7 +244,7 @@ class AirlyData:
         self.data = {}
 
         self.async_update = Throttle(
-            kwargs[CONF_SCAN_INTERVAL])(self._async_update)
+            kwargs[CONF_SCAN_INTERVAL])(self.data=self._async_update)
 
     async def _async_update(self):
         """Update Airly data."""
@@ -276,8 +278,10 @@ class AirlyData:
                     self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
                                                     ['percent'])
                     self.data[ATTR_CAQI] = current['indexes'][0]['value']
-                    self.data[ATTR_CAQI_LEVEL] = (current['indexes'][0]
-                                                  ['level'].lower().replace('_', ' '))
+                    self.data[ATTR_CAQI_LEVEL] = (
+                        current['indexes'][0]['level'].lower().replace(
+                            '_', ' ')
+                    )
                     self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
                                                         ['description'])
                     self.data[ATTR_CAQI_ADVICE] = (current['indexes'][0]
