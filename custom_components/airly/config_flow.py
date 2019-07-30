@@ -10,11 +10,12 @@ from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 from homeassistant import config_entries, data_entry_flow
 
-from .const import (DOMAIN, DEFAULT_NAME, CONF_LANGUAGE, DEFAULT_LANGUAGE,
-    LANGUAGE_CODES
+from .const import (
+    DOMAIN, DEFAULT_NAME, CONF_LANGUAGE, DEFAULT_LANGUAGE, LANGUAGE_CODES
 )
 
 _LOGGER = logging.getLogger(__name__)
+
 
 @callback
 def configured_instances(hass):
@@ -39,21 +40,23 @@ class AirlyFlowHandler(data_entry_flow.FlowHandler):
         self._errors = {}
 
         if user_input is not None:
-            if user_input[CONF_NAME] not in configured_instances(self.hass):
-                return self.async_create_entry(
-                    title=user_input[CONF_NAME],
-                    data=user_input,
-                )
-
-            self._errors[CONF_NAME] = 'name_exists'
+            if user_input[CONF_LANGUAGE] in LANGUAGE_CODES:
+                if user_input[CONF_NAME] not in configured_instances(self.hass):
+                    return self.async_create_entry(
+                        title=user_input[CONF_NAME],
+                        data=user_input,
+                    )
+                self._errors[CONF_NAME] = 'name_exists'
+            else:
+                self._errors['base'] = 'wrong_lang'
 
         return await self._show_config_form(
             name=DEFAULT_NAME,
-            api_key = '',
+            api_key='',
             latitude=self.hass.config.latitude,
             longitude=self.hass.config.longitude,
             language=DEFAULT_LANGUAGE
-            )
+        )
 
     async def _show_config_form(self, name=None, api_key=None, latitude=None,
                                 longitude=None, language=None):

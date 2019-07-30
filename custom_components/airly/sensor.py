@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 __VERSION__ = '0.5.0'
 
-DEFAULT_MONITORED_CONDITIONS = ['pm1', 'pm25', 'pm10']
+DEFAULT_MONITORED_CONDITIONS = [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_CAQI]
 DEFAULT_ATTRIBUTION = {"en": "Data provided by Airly",
                        "pl": "Dane dostarczone przez Airly"}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
@@ -36,7 +36,7 @@ LABEL_PM10 = 'PM10'
 LABEL_CAQI = 'CAQI'
 LABEL_CAQI_DESCRIPTION = 'Description'
 VOLUME_MICROGRAMS_PER_CUBIC_METER = 'µg/m³'
-HUMI_PERCENT ='%'
+HUMI_PERCENT = '%'
 
 ATTR_LIMIT = 'limit'
 ATTR_PERCENT = 'percent'
@@ -75,7 +75,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
                  default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
     vol.Optional(CONF_MONITORED_CONDITIONS,
                  default=DEFAULT_MONITORED_CONDITIONS):
-        vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
+    vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL):
         cv.time_period
@@ -106,6 +106,7 @@ async def async_setup_platform(
     for condition in config[CONF_MONITORED_CONDITIONS]:
         sensors.append(AirlySensor(data, name, condition, language))
     async_add_entities(sensors, True)
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
@@ -153,17 +154,17 @@ class AirlySensor(Entity):
         if self.airly.data_available:
             if self.type == ATTR_CAQI_DESCRIPTION:
                 self._attrs[ATTR_CAQI_ADVICE] = (self.airly.data
-                        [ATTR_CAQI_ADVICE])
+                                                 [ATTR_CAQI_ADVICE])
             if self.type == ATTR_CAQI:
                 self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
             if self.type == ATTR_PM25:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
                 self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                        [ATTR_PM25_PERCENT]))
+                                                   [ATTR_PM25_PERCENT]))
             if self.type == ATTR_PM10:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
                 self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                        [ATTR_PM10_PERCENT]))
+                                                   [ATTR_PM10_PERCENT]))
         return self._attrs
 
     @property
@@ -212,7 +213,7 @@ class AirlySensor(Entity):
         if self.airly.data_available:
             self._state = self.airly.data[self.type]
             if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
-                            ATTR_CAQI]:
+                             ATTR_CAQI]:
                 self._state = round(self._state)
             if self.type in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
                 self._state = round(self._state, 1)
@@ -265,25 +266,25 @@ class AirlyData:
                 if current['indexes'][0]['value']:
                     for i in range(len(current['values'])):
                         self.data[current['values'][i]['name'].lower()] = \
-                                current['values'][i]['value']
+                            current['values'][i]['value']
                     self.data[ATTR_PM25_LIMIT] = (current['standards'][0]
-                            ['limit'])
+                                                  ['limit'])
                     self.data[ATTR_PM25_PERCENT] = (current['standards'][0]
-                            ['percent'])
+                                                    ['percent'])
                     self.data[ATTR_PM10_LIMIT] = (current['standards'][1]
-                            ['limit'])
+                                                  ['limit'])
                     self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
-                            ['percent'])
+                                                    ['percent'])
                     self.data[ATTR_CAQI] = current['indexes'][0]['value']
                     self.data[ATTR_CAQI_LEVEL] = (current['indexes'][0]
-                            ['level'].lower().replace('_', ' '))
+                                                  ['level'].lower().replace('_', ' '))
                     self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
-                            ['description'])
+                                                        ['description'])
                     self.data[ATTR_CAQI_ADVICE] = (current['indexes'][0]
-                            ['advice'])
+                                                   ['advice'])
                     self.data_available = True
                 else:
-                    _LOGGER.error("Can't retrieve data: no Airly sensors in " \
-                            "this area")
+                    _LOGGER.error("Can't retrieve data: no Airly sensors in "
+                                  "this area")
         except (asyncio.TimeoutError, aiohttp.ClientError, ValueError) as error:
             _LOGGER.error(error)

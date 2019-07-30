@@ -1,7 +1,7 @@
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 ## API Key
-To generate `api key` go to [Airly for developers](https://developer.airly.eu/register) page.
+To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
 
 ## Minimal configuration
 ```yaml
@@ -14,6 +14,7 @@ sensor:
 ```yaml
 sensor:
   - platform: airly
+    name: 'Air Quality'
     api_key: !secret airly_api_key
     latitude: !secret latitude
     longitude: !secret longitude
@@ -34,6 +35,7 @@ sensor:
 
 key | optional | type | default | description
 -- | -- | -- | -- | --
+`name` | True | string | `Airly` | name of the sensors
 `api_key` | False | string | | Airly API key
 `latitude` | True | string | latitude from HA config | latitude of the location to monitor
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
