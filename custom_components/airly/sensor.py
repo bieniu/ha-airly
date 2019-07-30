@@ -244,7 +244,7 @@ class AirlyData:
         self.data = {}
 
         self.async_update = Throttle(
-            kwargs[CONF_SCAN_INTERVAL])(self.data=self._async_update)
+            kwargs[CONF_SCAN_INTERVAL])(self._async_update)
 
     async def _async_update(self):
         """Update Airly data."""
@@ -288,7 +288,7 @@ class AirlyData:
                                                    ['advice'])
                     self.data_available = True
                 else:
-                    _LOGGER.error("Can't retrieve data: no Airly sensors in "
-                                  "this area")
+                    _LOGGER.error("Can't retrieve data: no Airly sensors in"
+                                  " this area")
         except (asyncio.TimeoutError, aiohttp.ClientError, ValueError) as error:
             _LOGGER.error(error)
