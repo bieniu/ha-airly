@@ -1,5 +1,7 @@
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
+You can add this integration to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
+
 ## API Key
 To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
 
@@ -41,4 +43,4 @@ key | optional | type | default | description
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
 `language` | True | string | `en` | language, available `en` and `pl`
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
-`monitored_conditions` | True | list | `pm1, pm25, pm10` | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
+`monitored_conditions` | True | list | all available | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`

@@ -7,85 +7,109 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_MONITORED_CONDITIONS, CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE,
-    CONF_API_KEY, CONF_SCAN_INTERVAL, TEMP_CELSIUS, DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_PRESSURE, PRESSURE_HPA, HTTP_OK,
-    CONTENT_TYPE_JSON, ATTR_ATTRIBUTION
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+    CONF_LATITUDE,
+    CONF_LONGITUDE,
+    CONF_API_KEY,
+    CONF_SCAN_INTERVAL,
+    TEMP_CELSIUS,
+    DEVICE_CLASS_HUMIDITY,
+    DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_PRESSURE,
+    PRESSURE_HPA,
+    HTTP_OK,
+    CONTENT_TYPE_JSON,
+    ATTR_ATTRIBUTION,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-from .const import DEFAULT_NAME, CONF_LANGUAGE, DEFAULT_LANGUAGE, LANGUAGE_CODES
+from .const import (
+    DEFAULT_NAME,
+    CONF_LANGUAGE,
+    DEFAULT_LANGUAGE,
+    LANGUAGE_CODES,
+    NO_AIRLY_SENSORS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = '0.5.0'
+__VERSION__ = "0.5.0"
 
-DEFAULT_ATTRIBUTION = {"en": "Data provided by Airly",
-                       "pl": "Dane dostarczone przez Airly"}
+DEFAULT_ATTRIBUTION = {
+    "en": "Data provided by Airly",
+    "pl": "Dane dostarczone przez Airly",
+}
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
 
-LABEL_TEMPERATURE = 'Temperature'
-LABEL_HUMIDITY = 'Humidity'
-LABEL_PRESSURE = 'Pressure'
-LABEL_PM1 = 'PM1'
-LABEL_PM25 = 'PM2.5'
-LABEL_PM10 = 'PM10'
-LABEL_CAQI = 'CAQI'
-LABEL_CAQI_DESCRIPTION = 'Description'
-VOLUME_MICROGRAMS_PER_CUBIC_METER = 'µg/m³'
-HUMI_PERCENT = '%'
+LABEL_TEMPERATURE = "Temperature"
+LABEL_HUMIDITY = "Humidity"
+LABEL_PRESSURE = "Pressure"
+LABEL_PM1 = "PM1"
+LABEL_PM25 = "PM2.5"
+LABEL_PM10 = "PM10"
+LABEL_CAQI = "CAQI"
+LABEL_CAQI_DESCRIPTION = "Description"
+VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
+HUMI_PERCENT = "%"
 
-ATTR_LIMIT = 'limit'
-ATTR_PERCENT = 'percent'
-ATTR_PM1 = 'pm1'
-ATTR_PM25 = 'pm25'
-ATTR_PM25_LIMIT = 'pm25_limit'
-ATTR_PM25_PERCENT = 'pm25_percent'
-ATTR_PM10 = 'pm10'
-ATTR_PM10_LIMIT = 'pm10_limit'
-ATTR_PM10_PERCENT = 'pm10_percent'
-ATTR_TEMPERATURE = 'temperature'
-ATTR_HUMIDITY = 'humidity'
-ATTR_PRESSURE = 'pressure'
-ATTR_CAQI = 'caqi'
-ATTR_CAQI_LEVEL = 'level'
-ATTR_CAQI_DESCRIPTION = 'description'
-ATTR_CAQI_ADVICE = 'advice'
+ATTR_LIMIT = "limit"
+ATTR_PERCENT = "percent"
+ATTR_PM1 = "pm1"
+ATTR_PM25 = "pm25"
+ATTR_PM25_LIMIT = "pm25_limit"
+ATTR_PM25_PERCENT = "pm25_percent"
+ATTR_PM10 = "pm10"
+ATTR_PM10_LIMIT = "pm10_limit"
+ATTR_PM10_PERCENT = "pm10_percent"
+ATTR_TEMPERATURE = "temperature"
+ATTR_HUMIDITY = "humidity"
+ATTR_PRESSURE = "pressure"
+ATTR_CAQI = "caqi"
+ATTR_CAQI_LEVEL = "level"
+ATTR_CAQI_DESCRIPTION = "description"
+ATTR_CAQI_ADVICE = "advice"
 
-DEFAULT_MONITORED_CONDITIONS = [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_CAQI,
-                                ATTR_CAQI_DESCRIPTION]
+DEFAULT_MONITORED_CONDITIONS = [
+    ATTR_PM1,
+    ATTR_PM25,
+    ATTR_PM10,
+    ATTR_CAQI,
+    ATTR_CAQI_DESCRIPTION,
+    ATTR_PRESSURE,
+    ATTR_HUMIDITY,
+    ATTR_TEMPERATURE,
+]
 
 SENSOR_TYPES = {
-    ATTR_PM1: [LABEL_PM1, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
-    ATTR_PM25: [LABEL_PM25, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
-    ATTR_PM10: [LABEL_PM10, VOLUME_MICROGRAMS_PER_CUBIC_METER, 'mdi:blur'],
-    ATTR_PRESSURE: [LABEL_PRESSURE, PRESSURE_HPA, 'mdi:gauge'],
-    ATTR_HUMIDITY: [LABEL_HUMIDITY, HUMI_PERCENT, 'mdi:water-percent'],
-    ATTR_TEMPERATURE: [LABEL_TEMPERATURE, TEMP_CELSIUS, 'mdi:thermometer'],
+    ATTR_PM1: [LABEL_PM1, VOLUME_MICROGRAMS_PER_CUBIC_METER, "mdi:blur"],
+    ATTR_PM25: [LABEL_PM25, VOLUME_MICROGRAMS_PER_CUBIC_METER, "mdi:blur"],
+    ATTR_PM10: [LABEL_PM10, VOLUME_MICROGRAMS_PER_CUBIC_METER, "mdi:blur"],
+    ATTR_PRESSURE: [LABEL_PRESSURE, PRESSURE_HPA, "mdi:gauge"],
+    ATTR_HUMIDITY: [LABEL_HUMIDITY, HUMI_PERCENT, "mdi:water-percent"],
+    ATTR_TEMPERATURE: [LABEL_TEMPERATURE, TEMP_CELSIUS, "mdi:thermometer"],
     ATTR_CAQI: [LABEL_CAQI, None, None],
-    ATTR_CAQI_DESCRIPTION: [LABEL_CAQI_DESCRIPTION, None,
-                            'mdi:card-text-outline']
+    ATTR_CAQI_DESCRIPTION: [LABEL_CAQI_DESCRIPTION, None, "mdi:card-text-outline"],
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_API_KEY, None): cv.string,
-    vol.Required(CONF_LATITUDE): cv.latitude,
-    vol.Required(CONF_LONGITUDE): cv.longitude,
-    vol.Optional(CONF_LANGUAGE,
-                 default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
-    vol.Optional(CONF_MONITORED_CONDITIONS,
-                 default=DEFAULT_MONITORED_CONDITIONS):
-    vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
-    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL):
-        cv.time_period
-})
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Required(CONF_API_KEY, None): cv.string,
+        vol.Required(CONF_LATITUDE): cv.latitude,
+        vol.Required(CONF_LONGITUDE): cv.longitude,
+        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
+        vol.Optional(
+            CONF_MONITORED_CONDITIONS, default=DEFAULT_MONITORED_CONDITIONS
+        ): vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
+        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
+    }
+)
 
 
-async def async_setup_platform(
-        hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
 
     name = config.get(CONF_NAME)
@@ -99,7 +123,7 @@ async def async_setup_platform(
         latitude,
         longitude,
         language,
-        scan_interval=config[CONF_SCAN_INTERVAL]
+        scan_interval=config[CONF_SCAN_INTERVAL],
     )
 
     await data.async_update()
@@ -121,11 +145,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
     data = AirlyData(
-        api_key,
-        latitude,
-        longitude,
-        language,
-        scan_interval=scan_interval
+        api_key, latitude, longitude, language, scan_interval=scan_interval
     )
 
     await data.async_update()
@@ -155,24 +175,21 @@ class AirlySensor(Entity):
         """Return the device state attributes."""
         if self.airly.data_available:
             if self.type == ATTR_CAQI_DESCRIPTION:
-                self._attrs[ATTR_CAQI_ADVICE] = (self.airly.data
-                                                 [ATTR_CAQI_ADVICE])
+                self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
             if self.type == ATTR_CAQI:
                 self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
             if self.type == ATTR_PM25:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
-                self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                                                   [ATTR_PM25_PERCENT]))
+                self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM25_PERCENT])
             if self.type == ATTR_PM10:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
-                self._attrs[ATTR_PERCENT] = (round(self.airly.data
-                                                   [ATTR_PM10_PERCENT]))
+                self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM10_PERCENT])
         return self._attrs
 
     @property
     def name(self):
         """Return the name."""
-        return '{} {}'.format(self._name, SENSOR_TYPES[self.type][0])
+        return "{} {}".format(self._name, SENSOR_TYPES[self.type][0])
 
     @property
     def icon(self):
@@ -180,15 +197,15 @@ class AirlySensor(Entity):
         if self.airly.data_available:
             if self.type == ATTR_CAQI:
                 if self._state <= 25:
-                    return 'mdi:emoticon-excited'
+                    return "mdi:emoticon-excited"
                 elif self._state <= 50:
-                    return 'mdi:emoticon-happy'
+                    return "mdi:emoticon-happy"
                 elif self._state <= 75:
-                    return 'mdi:emoticon-neutral'
+                    return "mdi:emoticon-neutral"
                 elif self._state <= 100:
-                    return 'mdi:emoticon-sad'
+                    return "mdi:emoticon-sad"
                 elif self._state > 100:
-                    return 'mdi:emoticon-dead'
+                    return "mdi:emoticon-dead"
         return SENSOR_TYPES[self.type][2]
 
     @property
@@ -206,16 +223,14 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return '{}-{}-{}'.format(self.airly.latitude, self.airly.longitude,
-                                 self.type)
+        return "{}-{}-{}".format(self.airly.latitude, self.airly.longitude, self.type)
 
     @property
     def state(self):
         """Return the state."""
         if self.airly.data_available:
             self._state = self.airly.data[self.type]
-            if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE,
-                             ATTR_CAQI]:
+            if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
                 self._state = round(self._state)
             if self.type in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
                 self._state = round(self._state, 1)
@@ -243,52 +258,47 @@ class AirlyData:
         self.data_available = False
         self.data = {}
 
-        self.async_update = Throttle(
-            kwargs[CONF_SCAN_INTERVAL])(self._async_update)
+        self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
 
     async def _async_update(self):
         """Update Airly data."""
         from airly import Airly
+        from airly.exceptions import AirlyError
 
         try:
             async with aiohttp.ClientSession() as http_session:
-                airly = Airly(
-                    self.api_key,
-                    http_session,
-                    language=self.language
-                )
+                airly = Airly(self.api_key, http_session, language=self.language)
                 measurements = airly.create_measurements_session_point(
-                    self.latitude,
-                    self.longitude
+                    self.latitude, self.longitude
                 )
 
                 await measurements.update()
                 current = measurements.current
 
-                if current['indexes'][0]['value']:
-                    for i in range(len(current['values'])):
-                        self.data[current['values'][i]['name'].lower()] = \
-                            current['values'][i]['value']
-                    self.data[ATTR_PM25_LIMIT] = (current['standards'][0]
-                                                  ['limit'])
-                    self.data[ATTR_PM25_PERCENT] = (current['standards'][0]
-                                                    ['percent'])
-                    self.data[ATTR_PM10_LIMIT] = (current['standards'][1]
-                                                  ['limit'])
-                    self.data[ATTR_PM10_PERCENT] = (current['standards'][1]
-                                                    ['percent'])
-                    self.data[ATTR_CAQI] = current['indexes'][0]['value']
+                if current["indexes"][0]["description"] != NO_AIRLY_SENSORS:
+                    for i in range(len(current["values"])):
+                        self.data[current["values"][i]["name"].lower()] = current[
+                            "values"
+                        ][i]["value"]
+                    self.data[ATTR_PM25_LIMIT] = current["standards"][0]["limit"]
+                    self.data[ATTR_PM25_PERCENT] = current["standards"][0]["percent"]
+                    self.data[ATTR_PM10_LIMIT] = current["standards"][1]["limit"]
+                    self.data[ATTR_PM10_PERCENT] = current["standards"][1]["percent"]
+                    self.data[ATTR_CAQI] = current["indexes"][0]["value"]
                     self.data[ATTR_CAQI_LEVEL] = (
-                        current['indexes'][0]['level'].lower().replace(
-                            '_', ' ')
+                        current["indexes"][0]["level"].lower().replace("_", " ")
                     )
-                    self.data[ATTR_CAQI_DESCRIPTION] = (current['indexes'][0]
-                                                        ['description'])
-                    self.data[ATTR_CAQI_ADVICE] = (current['indexes'][0]
-                                                   ['advice'])
+                    self.data[ATTR_CAQI_DESCRIPTION] = current["indexes"][0][
+                        "description"
+                    ]
+                    self.data[ATTR_CAQI_ADVICE] = current["indexes"][0]["advice"]
                     self.data_available = True
                 else:
-                    _LOGGER.error("Can't retrieve data: no Airly sensors in"
-                                  " this area")
-        except (asyncio.TimeoutError, aiohttp.ClientError, ValueError) as error:
+                    _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
+        except (
+            asyncio.TimeoutError,
+            aiohttp.ClientError,
+            ValueError,
+            AirlyError,
+        ) as error:
             _LOGGER.error(error)
