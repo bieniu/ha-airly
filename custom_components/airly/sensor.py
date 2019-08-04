@@ -36,7 +36,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.5.0"
+__VERSION__ = "0.5.1"
 
 DEFAULT_ATTRIBUTION = {
     "en": "Data provided by Airly",
@@ -171,8 +171,8 @@ class AirlySensor(Entity):
         self.airly = airly
 
     @property
-    def device_state_attributes(self):
-        """Return the device state attributes."""
+    def state_attributes(self):
+        """Return the state attributes."""
         if self.airly.data_available:
             if self.type == ATTR_CAQI_DESCRIPTION:
                 self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
