@@ -1,0 +1,17 @@
+*.yaml
+*.log
+!custom_components/airly
+!airly.json
+custom_components/hacs
+python_scripts/
+appdaemon/
+appdaemon/apps/
+__pycache__/
+*.db
+*.conf
+.HA_VERSION
+.gitignore
+.cloud
+.storage
+.vscode
+!.gitignore
