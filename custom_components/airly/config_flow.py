@@ -42,10 +42,12 @@ class AirlyFlowHandler(data_entry_flow.FlowHandler):
 
         if user_input is not None:
             api_key_valid = await self._test_api_key(user_input["api_key"])
-            location_valid = await self._test_location(
-                user_input["api_key"], user_input["latitude"], user_input["longitude"]
-            )
             if api_key_valid:
+                location_valid = await self._test_location(
+                    user_input["api_key"],
+                    user_input["latitude"],
+                    user_input["longitude"],
+                )
                 if location_valid:
                     if user_input[CONF_LANGUAGE] in LANGUAGE_CODES:
                         if user_input[CONF_NAME] not in configured_instances(self.hass):

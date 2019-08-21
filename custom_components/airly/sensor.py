@@ -18,8 +18,6 @@ from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_PRESSURE,
     PRESSURE_HPA,
-    HTTP_OK,
-    CONTENT_TYPE_JSON,
     ATTR_ATTRIBUTION,
 )
 import homeassistant.helpers.config_validation as cv
@@ -36,7 +34,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.5.1"
+__VERSION__ = "0.5.2"
 
 DEFAULT_ATTRIBUTION = {
     "en": "Data provided by Airly",
@@ -159,10 +157,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, airly, name, type, language):
+    def __init__(self, airly, name, kind, language):
         """Initialize."""
         self._name = name
-        self.type = type
+        self.kind = kind
         self._state = None
         self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION[language]}
         self._device_class = None
@@ -174,14 +172,14 @@ class AirlySensor(Entity):
     def state_attributes(self):
         """Return the state attributes."""
         if self.airly.data_available:
-            if self.type == ATTR_CAQI_DESCRIPTION:
+            if self.kind == ATTR_CAQI_DESCRIPTION:
                 self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
-            if self.type == ATTR_CAQI:
+            if self.kind == ATTR_CAQI:
                 self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
-            if self.type == ATTR_PM25:
+            if self.kind == ATTR_PM25:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
                 self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM25_PERCENT])
-            if self.type == ATTR_PM10:
+            if self.kind == ATTR_PM10:
                 self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
                 self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM10_PERCENT])
         return self._attrs
@@ -189,13 +187,13 @@ class AirlySensor(Entity):
     @property
     def name(self):
         """Return the name."""
-        return "{} {}".format(self._name, SENSOR_TYPES[self.type][0])
+        return "{} {}".format(self._name, SENSOR_TYPES[self.kind][0])
 
     @property
     def icon(self):
         """Return the icon."""
         if self.airly.data_available:
-            if self.type == ATTR_CAQI:
+            if self.kind == ATTR_CAQI:
                 if self._state <= 25:
                     return "mdi:emoticon-excited"
                 elif self._state <= 50:
@@ -206,16 +204,16 @@ class AirlySensor(Entity):
                     return "mdi:emoticon-sad"
                 elif self._state > 100:
                     return "mdi:emoticon-dead"
-        return SENSOR_TYPES[self.type][2]
+        return SENSOR_TYPES[self.kind][2]
 
     @property
     def device_class(self):
         """Return the device_class."""
-        if self.type == ATTR_TEMPERATURE:
+        if self.kind == ATTR_TEMPERATURE:
             return DEVICE_CLASS_TEMPERATURE
-        elif self.type == ATTR_HUMIDITY:
+        elif self.kind == ATTR_HUMIDITY:
             return DEVICE_CLASS_HUMIDITY
-        elif self.type == ATTR_PRESSURE:
+        elif self.kind == ATTR_PRESSURE:
             return DEVICE_CLASS_PRESSURE
         else:
             return self._device_class
@@ -223,23 +221,23 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return "{}-{}-{}".format(self.airly.latitude, self.airly.longitude, self.type)
+        return "{}-{}-{}".format(self.airly.latitude, self.airly.longitude, self.kind)
 
     @property
     def state(self):
         """Return the state."""
         if self.airly.data_available:
-            self._state = self.airly.data[self.type]
-            if self.type in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
+            self._state = self.airly.data[self.kind]
+            if self.kind in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
                 self._state = round(self._state)
-            if self.type in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
+            if self.kind in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
                 self._state = round(self._state, 1)
         return self._state
 
     @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
-        return SENSOR_TYPES[self.type][1]
+        return SENSOR_TYPES[self.kind][1]
 
     async def async_update(self):
         """Get the data from Airly."""
