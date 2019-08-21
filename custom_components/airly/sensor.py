@@ -1,3 +1,10 @@
+"""
+Support for the Airly service.
+
+For more details about this platform, please refer to the documentation at
+https://github.com/bieniu/ha-airly
+"""
+
 import asyncio
 from datetime import timedelta
 import logging
@@ -195,28 +202,29 @@ class AirlySensor(Entity):
         if self.airly.data_available:
             if self.kind == ATTR_CAQI:
                 if self._state <= 25:
-                    return "mdi:emoticon-excited"
+                    self._icon = "mdi:emoticon-excited"
                 elif self._state <= 50:
-                    return "mdi:emoticon-happy"
+                    self._icon = "mdi:emoticon-happy"
                 elif self._state <= 75:
-                    return "mdi:emoticon-neutral"
+                    self._icon = "mdi:emoticon-neutral"
                 elif self._state <= 100:
-                    return "mdi:emoticon-sad"
+                    self._icon = "mdi:emoticon-sad"
                 elif self._state > 100:
-                    return "mdi:emoticon-dead"
-        return SENSOR_TYPES[self.kind][2]
+                    self._icon = "mdi:emoticon-dead"
+                else:
+                    self._icon = SENSOR_TYPES[self.kind][2]
+        return self._icon
 
     @property
     def device_class(self):
         """Return the device_class."""
         if self.kind == ATTR_TEMPERATURE:
-            return DEVICE_CLASS_TEMPERATURE
+            self._device_class = DEVICE_CLASS_TEMPERATURE
         elif self.kind == ATTR_HUMIDITY:
-            return DEVICE_CLASS_HUMIDITY
+            self._device_class = DEVICE_CLASS_HUMIDITY
         elif self.kind == ATTR_PRESSURE:
-            return DEVICE_CLASS_PRESSURE
-        else:
-            return self._device_class
+            self._device_class = DEVICE_CLASS_PRESSURE
+        return self._device_class
 
     @property
     def unique_id(self):

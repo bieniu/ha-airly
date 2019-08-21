@@ -109,7 +109,6 @@ class AirlyFlowHandler(data_entry_flow.FlowHandler):
     async def _test_location(self, api_key, latitude, longitude):
         """Return true if location is valid."""
         from airly import Airly
-        from airly.exceptions import AirlyError
 
         async with aiohttp.ClientSession() as http_session:
             airly = Airly(api_key, http_session)
@@ -121,5 +120,4 @@ class AirlyFlowHandler(data_entry_flow.FlowHandler):
             current = measurements.current
             if current["indexes"][0]["description"] == NO_AIRLY_SENSORS:
                 return False
-            else:
-                return True
+            return True
