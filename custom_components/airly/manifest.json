@@ -6,6 +6,7 @@
     "codeowners": [
         "@bieniu"
     ],
+    "homeassistant": "0.98.0",
     "requirements": ["airly==0.0.2"],
     "config_flow": true
 }

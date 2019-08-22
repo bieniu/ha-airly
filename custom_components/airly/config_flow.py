@@ -25,8 +25,7 @@ def configured_instances(hass):
     )
 
 
-@config_entries.HANDLERS.register(DOMAIN)
-class AirlyFlowHandler(data_entry_flow.FlowHandler):
+class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Airly."""
 
     VERSION = 1
