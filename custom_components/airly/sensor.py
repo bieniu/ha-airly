@@ -190,7 +190,7 @@ class AirlySensor(Entity):
     @property
     def name(self):
         """Return the name."""
-        return "{} {}".format(self._name, SENSOR_TYPES[self.kind][0])
+        return f"{self._name} {SENSOR_TYPES[self.kind][0]}"
 
     @property
     def icon(self):
@@ -225,7 +225,7 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return "{}-{}-{}".format(self.airly.latitude, self.airly.longitude, self.kind)
+        return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind}"
 
     @property
     def state(self):
