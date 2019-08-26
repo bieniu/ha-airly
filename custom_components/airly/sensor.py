@@ -211,8 +211,8 @@ class AirlySensor(Entity):
                     self._icon = "mdi:emoticon-sad"
                 elif self._state > 100:
                     self._icon = "mdi:emoticon-dead"
-                else:
-                    self._icon = SENSOR_TYPES[self.kind][2]
+            else:
+                self._icon = SENSOR_TYPES[self.kind][2]
         return self._icon
 
     @property
