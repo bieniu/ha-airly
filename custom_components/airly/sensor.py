@@ -14,27 +14,27 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_MONITORED_CONDITIONS,
-    CONF_NAME,
+    ATTR_ATTRIBUTION,
+    CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
-    CONF_API_KEY,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
     CONF_SCAN_INTERVAL,
-    TEMP_CELSIUS,
     DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_PRESSURE,
+    DEVICE_CLASS_TEMPERATURE,
     PRESSURE_HPA,
-    ATTR_ATTRIBUTION,
+    TEMP_CELSIUS,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const import (
-    DEFAULT_NAME,
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,
 )
@@ -117,21 +117,19 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
 
-    name = config.get(CONF_NAME)
+    name = config[CONF_NAME]
     latitude = config.get(CONF_LATITUDE, hass.config.latitude)
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
-    language = config.get(CONF_LANGUAGE)
+    language = config[CONF_LANGUAGE]
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
     data = AirlyData(
-        config.get(CONF_API_KEY),
+        config[CONF_API_KEY],
         latitude,
         longitude,
         language,
         scan_interval=config[CONF_SCAN_INTERVAL],
     )
-
-    await data.async_update()
 
     sensors = []
     for condition in config[CONF_MONITORED_CONDITIONS]:
@@ -152,8 +150,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     data = AirlyData(
         api_key, latitude, longitude, language, scan_interval=scan_interval
     )
-
-    await data.async_update()
 
     sensors = []
     for condition in DEFAULT_MONITORED_CONDITIONS:
@@ -194,7 +190,7 @@ class AirlySensor(Entity):
     @property
     def name(self):
         """Return the name."""
-        return "{} {}".format(self._name, SENSOR_TYPES[self.kind][0])
+        return f"{self._name} {SENSOR_TYPES[self.kind][0]}"
 
     @property
     def icon(self):
@@ -229,7 +225,7 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return "{}-{}-{}".format(self.airly.latitude, self.airly.longitude, self.kind)
+        return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind}"
 
     @property
     def state(self):
