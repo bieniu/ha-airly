@@ -41,7 +41,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.5.2"
+__VERSION__ = "0.5.4"
 
 DEFAULT_ATTRIBUTION = {
     "en": "Data provided by Airly",
@@ -211,8 +211,8 @@ class AirlySensor(Entity):
                     self._icon = "mdi:emoticon-sad"
                 elif self._state > 100:
                     self._icon = "mdi:emoticon-dead"
-                else:
-                    self._icon = SENSOR_TYPES[self.kind][2]
+            else:
+                self._icon = SENSOR_TYPES[self.kind][2]
         return self._icon
 
     @property
