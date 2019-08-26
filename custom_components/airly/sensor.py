@@ -41,8 +41,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-__VERSION__ = "0.5.4"
-
 DEFAULT_ATTRIBUTION = {
     "en": "Data provided by Airly",
     "pl": "Dane dostarczone przez Airly",
