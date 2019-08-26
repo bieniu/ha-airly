@@ -118,8 +118,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Configure the platform and add the sensors."""
 
     name = config[CONF_NAME]
-    latitude = config[CONF_LATITUDE, hass.config.latitude]
-    longitude = config[CONF_LONGITUDE, hass.config.longitude]
+    latitude = config.get(CONF_LATITUDE, hass.config.latitude)
+    longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     language = config[CONF_LANGUAGE]
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
