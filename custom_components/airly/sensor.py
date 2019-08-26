@@ -14,27 +14,27 @@ import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
-    CONF_MONITORED_CONDITIONS,
-    CONF_NAME,
+    ATTR_ATTRIBUTION,
+    CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
-    CONF_API_KEY,
+    CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
     CONF_SCAN_INTERVAL,
-    TEMP_CELSIUS,
     DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_PRESSURE,
+    DEVICE_CLASS_TEMPERATURE,
     PRESSURE_HPA,
-    ATTR_ATTRIBUTION,
+    TEMP_CELSIUS,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const import (
-    DEFAULT_NAME,
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,
 )
