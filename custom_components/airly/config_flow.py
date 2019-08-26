@@ -10,7 +10,7 @@ import homeassistant.helpers.config_validation as cv
 from .const import (
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
-    DEFAULT_NAME,   
+    DEFAULT_NAME,
     DOMAIN,
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,

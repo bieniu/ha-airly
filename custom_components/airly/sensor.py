@@ -131,8 +131,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         scan_interval=config[CONF_SCAN_INTERVAL],
     )
 
-    await data.async_update()
-
     sensors = []
     for condition in config[CONF_MONITORED_CONDITIONS]:
         sensors.append(AirlySensor(data, name, condition, language))
@@ -152,8 +150,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     data = AirlyData(
         api_key, latitude, longitude, language, scan_interval=scan_interval
     )
-
-    await data.async_update()
 
     sensors = []
     for condition in DEFAULT_MONITORED_CONDITIONS:

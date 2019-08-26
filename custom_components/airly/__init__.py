@@ -2,8 +2,6 @@
 from homeassistant.core import Config, HomeAssistant
 from .config_flow import AirlyFlowHandler
 
-from .const import DOMAIN
-
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up configured Airly."""
