@@ -1,6 +1,5 @@
 """The Airly component."""
 from homeassistant.core import Config, HomeAssistant
-from .config_flow import AirlyFlowHandler
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
