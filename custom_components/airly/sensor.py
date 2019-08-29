@@ -18,7 +18,6 @@ from homeassistant.const import (
     CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
-    CONF_MONITORED_CONDITIONS,
     CONF_NAME,
     CONF_SCAN_INTERVAL,
     DEVICE_CLASS_HUMIDITY,
@@ -75,7 +74,7 @@ ATTR_CAQI_LEVEL = "level"
 ATTR_CAQI_DESCRIPTION = "description"
 ATTR_CAQI_ADVICE = "advice"
 
-DEFAULT_MONITORED_CONDITIONS = [
+AVAILABLE_CONDITIONS = [
     ATTR_PM1,
     ATTR_PM25,
     ATTR_PM10,
@@ -103,9 +102,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_LATITUDE): cv.latitude,
         vol.Required(CONF_LONGITUDE): cv.longitude,
         vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
-        vol.Optional(
-            CONF_MONITORED_CONDITIONS, default=DEFAULT_MONITORED_CONDITIONS
-        ): vol.All(cv.ensure_list, [vol.In(SENSOR_TYPES)]),
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
     }
@@ -129,8 +125,10 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         scan_interval=config[CONF_SCAN_INTERVAL],
     )
 
+    await data.async_update()
+
     sensors = []
-    for condition in config[CONF_MONITORED_CONDITIONS]:
+    for condition in AVAILABLE_CONDITIONS:
         sensors.append(AirlySensor(data, name, condition, language))
     async_add_entities(sensors, True)
 
@@ -150,7 +148,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     )
 
     sensors = []
-    for condition in DEFAULT_MONITORED_CONDITIONS:
+    for condition in AVAILABLE_CONDITIONS:
         sensors.append(AirlySensor(data, name, condition, language))
     async_add_entities(sensors, True)
 

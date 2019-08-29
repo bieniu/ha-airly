@@ -27,15 +27,6 @@ sensor:
     longitude: !secret longitude
     language: 'pl'
     scan_interval: 300
-    monitored_conditions:
-      - pm1
-      - pm25
-      - pm10
-      - caqi
-      - temperature
-      - pressure
-      - humidity
-      - description
 ```
 
 ## Arguments
@@ -48,7 +39,6 @@ key | optional | type | default | description
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
 `language` | True | string | `en` | language, available `en` and `pl`
 `scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
-`monitored_conditions` | True | list | all available | list of monitored conditions, available: `pm1`, `pm25`, `pm10`, `caqi`, `temperature`, `humidity`, `pressure`, `description`
 
 
 [releases]: https://github.com/bieniu/ha-airly/releases
