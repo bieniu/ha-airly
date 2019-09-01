@@ -1,5 +1,7 @@
 """Adds config flow for Airly."""
 import aiohttp
+from airly import Airly
+from airly.exceptions import AirlyError
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -89,8 +91,6 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _test_api_key(self, api_key):
         """Return true if api_key is valid."""
-        from airly import Airly
-        from airly.exceptions import AirlyError
 
         async with aiohttp.ClientSession() as http_session:
             try:
@@ -107,7 +107,6 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _test_location(self, api_key, latitude, longitude):
         """Return true if location is valid."""
-        from airly import Airly
 
         async with aiohttp.ClientSession() as http_session:
             airly = Airly(api_key, http_session)

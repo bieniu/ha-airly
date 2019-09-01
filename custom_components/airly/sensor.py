@@ -10,6 +10,8 @@ from datetime import timedelta
 import logging
 
 import aiohttp
+from airly import Airly
+from airly.exceptions import AirlyError
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -260,8 +262,6 @@ class AirlyData:
 
     async def _async_update(self):
         """Update Airly data."""
-        from airly import Airly
-        from airly.exceptions import AirlyError
 
         try:
             async with aiohttp.ClientSession() as http_session:
