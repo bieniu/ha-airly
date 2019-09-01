@@ -8,8 +8,8 @@ https://github.com/bieniu/ha-airly
 import asyncio
 from datetime import timedelta
 import logging
+import async_timeout
 
-import aiohttp
 from airly import Airly
 from airly.exceptions import AirlyError
 import voluptuous as vol
@@ -28,6 +28,7 @@ from homeassistant.const import (
     PRESSURE_HPA,
     TEMP_CELSIUS,
 )
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
@@ -114,17 +115,17 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Configure the platform and add the sensors."""
 
     name = config[CONF_NAME]
+    api_key = config[CONF_API_KEY]
     latitude = config.get(CONF_LATITUDE, hass.config.latitude)
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     language = config[CONF_LANGUAGE]
+    scan_interval = config[CONF_SCAN_INTERVAL]
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
+    websession = async_get_clientsession(hass)
+
     data = AirlyData(
-        config[CONF_API_KEY],
-        latitude,
-        longitude,
-        language,
-        scan_interval=config[CONF_SCAN_INTERVAL],
+        websession, api_key, latitude, longitude, language, scan_interval=scan_interval
     )
 
     await data.async_update()
@@ -145,8 +146,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     scan_interval = DEFAULT_SCAN_INTERVAL
     _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
+    websession = async_get_clientsession(hass)
+
     data = AirlyData(
-        api_key, latitude, longitude, language, scan_interval=scan_interval
+        websession, api_key, latitude, longitude, language, scan_interval=scan_interval
     )
 
     sensors = []
@@ -249,8 +252,9 @@ class AirlySensor(Entity):
 class AirlyData:
     """Define an object to hold sensor data."""
 
-    def __init__(self, api_key, latitude, longitude, language, **kwargs):
+    def __init__(self, client, api_key, latitude, longitude, language, **kwargs):
         """Initialize."""
+        self.client = client
         self.latitude = latitude
         self.longitude = longitude
         self.language = language
@@ -264,39 +268,32 @@ class AirlyData:
         """Update Airly data."""
 
         try:
-            async with aiohttp.ClientSession() as http_session:
-                airly = Airly(self.api_key, http_session, language=self.language)
+            with async_timeout.timeout(10):
+                airly = Airly(self.api_key, self.client, language=self.language)
                 measurements = airly.create_measurements_session_point(
                     self.latitude, self.longitude
                 )
 
                 await measurements.update()
-                current = measurements.current
+            current = measurements.current
 
-                if current["indexes"][0]["description"] != NO_AIRLY_SENSORS:
-                    for i in range(len(current["values"])):
-                        self.data[current["values"][i]["name"].lower()] = current[
-                            "values"
-                        ][i]["value"]
-                    self.data[ATTR_PM25_LIMIT] = current["standards"][0]["limit"]
-                    self.data[ATTR_PM25_PERCENT] = current["standards"][0]["percent"]
-                    self.data[ATTR_PM10_LIMIT] = current["standards"][1]["limit"]
-                    self.data[ATTR_PM10_PERCENT] = current["standards"][1]["percent"]
-                    self.data[ATTR_CAQI] = current["indexes"][0]["value"]
-                    self.data[ATTR_CAQI_LEVEL] = (
-                        current["indexes"][0]["level"].lower().replace("_", " ")
-                    )
-                    self.data[ATTR_CAQI_DESCRIPTION] = current["indexes"][0][
-                        "description"
-                    ]
-                    self.data[ATTR_CAQI_ADVICE] = current["indexes"][0]["advice"]
-                    self.data_available = True
-                else:
-                    _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-        except (
-            asyncio.TimeoutError,
-            aiohttp.ClientError,
-            ValueError,
-            AirlyError,
-        ) as error:
+            if current["indexes"][0]["description"] != NO_AIRLY_SENSORS:
+                for i in range(len(current["values"])):
+                    self.data[current["values"][i]["name"].lower()] = current["values"][
+                        i
+                    ]["value"]
+                self.data[ATTR_PM25_LIMIT] = current["standards"][0]["limit"]
+                self.data[ATTR_PM25_PERCENT] = current["standards"][0]["percent"]
+                self.data[ATTR_PM10_LIMIT] = current["standards"][1]["limit"]
+                self.data[ATTR_PM10_PERCENT] = current["standards"][1]["percent"]
+                self.data[ATTR_CAQI] = current["indexes"][0]["value"]
+                self.data[ATTR_CAQI_LEVEL] = (
+                    current["indexes"][0]["level"].lower().replace("_", " ")
+                )
+                self.data[ATTR_CAQI_DESCRIPTION] = current["indexes"][0]["description"]
+                self.data[ATTR_CAQI_ADVICE] = current["indexes"][0]["advice"]
+                self.data_available = True
+            else:
+                _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
+        except (ValueError, AirlyError) as error:
             _LOGGER.error(error)
