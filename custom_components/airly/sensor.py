@@ -5,7 +5,6 @@ For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-airly
 """
 
-import asyncio
 from datetime import timedelta
 import logging
 import async_timeout
