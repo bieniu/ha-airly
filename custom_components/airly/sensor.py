@@ -260,7 +260,7 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind}"
+        return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind.lower()}"
 
     @property
     def unit_of_measurement(self):
