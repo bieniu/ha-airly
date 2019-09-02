@@ -281,7 +281,7 @@ class AirlyData:
 
             if indexes[0]["description"] != NO_AIRLY_SENSORS:
                 for value in values:
-                    self.data[value["name"].lower] = value["value"]
+                    self.data[value["name"].lower()] = value["value"]
                 self.data[ATTR_PM25_LIMIT] = standards[0]["limit"]
                 self.data[ATTR_PM25_PERCENT] = standards[0]["percent"]
                 self.data[ATTR_PM10_LIMIT] = standards[1]["limit"]
