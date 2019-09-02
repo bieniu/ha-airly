@@ -5,9 +5,10 @@ For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-airly
 """
 
+import asyncio
+import async_timeout
 from datetime import timedelta
 import logging
-import async_timeout
 
 from airly import Airly
 from airly.exceptions import AirlyError
@@ -294,5 +295,5 @@ class AirlyData:
                 self.data_available = True
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-        except (ValueError, AirlyError) as error:
+        except (ValueError, AirlyError, asyncio.TimeoutError) as error:
             _LOGGER.error(error)
