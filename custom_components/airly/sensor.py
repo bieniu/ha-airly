@@ -155,7 +155,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     sensors = []
     for condition in AVAILABLE_CONDITIONS:
-        sensors.append(AirlySensor(data, name, condition, language))
+        sensors.append(AirlySensor(data, name, condition))
     async_add_entities(sensors, True)
 
 
@@ -175,41 +175,28 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         websession, api_key, latitude, longitude, language, scan_interval=scan_interval
     )
 
+    await data.async_update()
+
     sensors = []
     for condition in AVAILABLE_CONDITIONS:
-        sensors.append(AirlySensor(data, name, condition, language))
+        sensors.append(AirlySensor(data, name, condition))
     async_add_entities(sensors, True)
 
 
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, airly, name, kind, language):
+    def __init__(self, airly, name, kind):
         """Initialize."""
+        self.airly = airly
+        self.data = airly.data
         self._name = name
         self.kind = kind
         self._state = None
-        self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION[language]}
         self._device_class = None
         self._icon = None
         self._unit_of_measurement = None
-        self.airly = airly
-
-    @property
-    def state_attributes(self):
-        """Return the state attributes."""
-        if self.airly.data_available:
-            if self.kind == ATTR_CAQI_DESCRIPTION:
-                self._attrs[ATTR_CAQI_ADVICE] = self.airly.data[ATTR_CAQI_ADVICE]
-            if self.kind == ATTR_CAQI:
-                self._attrs[ATTR_CAQI_LEVEL] = self.airly.data[ATTR_CAQI_LEVEL]
-            if self.kind == ATTR_PM25:
-                self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM25_LIMIT]
-                self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM25_PERCENT])
-            if self.kind == ATTR_PM10:
-                self._attrs[ATTR_LIMIT] = self.airly.data[ATTR_PM10_LIMIT]
-                self._attrs[ATTR_PERCENT] = round(self.airly.data[ATTR_PM10_PERCENT])
-        return self._attrs
+        self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION[self.airly.language]}
 
     @property
     def name(self):
@@ -217,22 +204,46 @@ class AirlySensor(Entity):
         return f"{self._name} {SENSOR_TYPES[self.kind][ATTR_LABEL]}"
 
     @property
+    def state(self):
+        """Return the state."""
+        self._state = self.data[self.kind]
+        if self.kind in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
+            self._state = round(self._state)
+        if self.kind in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
+            self._state = round(self._state, 1)
+        return self._state
+
+    @property
+    def state_attributes(self):
+        """Return the state attributes."""
+        if self.kind == ATTR_CAQI_DESCRIPTION:
+            self._attrs[ATTR_CAQI_ADVICE] = self.data[ATTR_CAQI_ADVICE]
+        if self.kind == ATTR_CAQI:
+            self._attrs[ATTR_CAQI_LEVEL] = self.data[ATTR_CAQI_LEVEL]
+        if self.kind == ATTR_PM25:
+            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM25_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM25_PERCENT])
+        if self.kind == ATTR_PM10:
+            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM10_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM10_PERCENT])
+        return self._attrs
+
+    @property
     def icon(self):
         """Return the icon."""
-        if self.airly.data_available:
-            if self.kind == ATTR_CAQI:
-                if self._state <= 25:
-                    self._icon = "mdi:emoticon-excited"
-                elif self._state <= 50:
-                    self._icon = "mdi:emoticon-happy"
-                elif self._state <= 75:
-                    self._icon = "mdi:emoticon-neutral"
-                elif self._state <= 100:
-                    self._icon = "mdi:emoticon-sad"
-                elif self._state > 100:
-                    self._icon = "mdi:emoticon-dead"
-            else:
-                self._icon = SENSOR_TYPES[self.kind][ATTR_ICON]
+        if self.kind == ATTR_CAQI:
+            if self._state <= 25:
+                self._icon = "mdi:emoticon-excited"
+            elif self._state <= 50:
+                self._icon = "mdi:emoticon-happy"
+            elif self._state <= 75:
+                self._icon = "mdi:emoticon-neutral"
+            elif self._state <= 100:
+                self._icon = "mdi:emoticon-sad"
+            elif self._state > 100:
+                self._icon = "mdi:emoticon-dead"
+        else:
+            self._icon = SENSOR_TYPES[self.kind][ATTR_ICON]
         return self._icon
 
     @property
@@ -252,24 +263,21 @@ class AirlySensor(Entity):
         return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind}"
 
     @property
-    def state(self):
-        """Return the state."""
-        if self.airly.data_available:
-            self._state = self.airly.data[self.kind]
-            if self.kind in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
-                self._state = round(self._state)
-            if self.kind in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
-                self._state = round(self._state, 1)
-        return self._state
-
-    @property
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
         return SENSOR_TYPES[self.kind][ATTR_UNIT]
 
+    @property
+    def available(self):
+        """Return True if entity is available."""
+        return bool(self.airly.data)
+
     async def async_update(self):
         """Get the data from Airly."""
         await self.airly.async_update()
+
+        if not self.airly.data:
+            return
 
 
 class AirlyData:
@@ -282,7 +290,6 @@ class AirlyData:
         self.longitude = longitude
         self.language = language
         self.api_key = api_key
-        self.data_available = False
         self.data = {}
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
@@ -315,8 +322,8 @@ class AirlyData:
                 )
                 self.data[ATTR_CAQI_DESCRIPTION] = indexes[0]["description"]
                 self.data[ATTR_CAQI_ADVICE] = indexes[0]["advice"]
-                self.data_available = True
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
         except (ValueError, AirlyError, asyncio.TimeoutError) as error:
             _LOGGER.error(error)
+            self.data = {}
