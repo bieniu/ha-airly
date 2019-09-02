@@ -322,6 +322,7 @@ class AirlyData:
                 )
                 self.data[ATTR_CAQI_DESCRIPTION] = indexes[0]["description"]
                 self.data[ATTR_CAQI_ADVICE] = indexes[0]["advice"]
+                _LOGGER.debug("Data retrieved fromAirly")
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
         except (ValueError, AirlyError, asyncio.TimeoutError) as error:
