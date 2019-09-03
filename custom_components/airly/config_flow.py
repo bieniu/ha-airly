@@ -86,8 +86,8 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_API_KEY, default=api_key): str,
                     vol.Optional(CONF_LATITUDE, default=self.hass.config.latitude): cv.latitude,
                     vol.Optional(CONF_LONGITUDE, default=self.hass.config.longitude): cv.longitude,
-                    vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                    vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): str,
+                    vol.Optional(CONF_NAME, default=name): str,
+                    vol.Optional(CONF_LANGUAGE, default=language): str,
                 }
             ),
             errors=self._errors,
