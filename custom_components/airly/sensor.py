@@ -69,13 +69,15 @@ DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
 HUMI_PERCENT = "%"
 VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
 
-ATTRIBUTION = {
-    "en": "Data provided by Airly",
-    "pl": "Dane dostarczone przez Airly",
-}
+ATTRIBUTION = {"en": "Data provided by Airly", "pl": "Dane dostarczone przez Airly"}
 
 SENSOR_TYPES = {
-    ATTR_CAQI: {ATTR_DEVICE_CLASS: None, ATTR_ICON: None, ATTR_LABEL: ATTR_CAQI, ATTR_UNIT: None},
+    ATTR_CAQI: {
+        ATTR_DEVICE_CLASS: None,
+        ATTR_ICON: None,
+        ATTR_LABEL: ATTR_CAQI,
+        ATTR_UNIT: None,
+    },
     ATTR_CAQI_DESCRIPTION: {
         ATTR_DEVICE_CLASS: None,
         ATTR_ICON: "mdi:card-text-outline",
@@ -120,17 +122,6 @@ SENSOR_TYPES = {
     },
 }
 
-AVAILABLE_CONDITIONS = [
-    ATTR_CAQI,
-    ATTR_CAQI_DESCRIPTION,
-    ATTR_PM1,
-    ATTR_PM10,
-    ATTR_PM25,
-    ATTR_HUMIDITY,
-    ATTR_PRESSURE,
-    ATTR_TEMPERATURE,
-]
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_API_KEY, None): cv.string,
@@ -163,8 +154,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     await data.async_update()
 
     sensors = []
-    for condition in AVAILABLE_CONDITIONS:
-        sensors.append(AirlySensor(data, name, condition))
+    for sensor in SENSOR_TYPES:
+        sensors.append(AirlySensor(data, name, sensor))
     async_add_entities(sensors, True)
 
 
@@ -187,8 +178,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     await data.async_update()
 
     sensors = []
-    for condition in AVAILABLE_CONDITIONS:
-        sensors.append(AirlySensor(data, name, condition))
+    for sensor in SENSOR_TYPES:
+        sensors.append(AirlySensor(data, name, sensor))
     async_add_entities(sensors, True)
 
 
@@ -320,9 +311,7 @@ class AirlyData:
                     self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
                     self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
                 self.data[ATTR_CAQI] = index["value"]
-                self.data[ATTR_CAQI_LEVEL] = (
-                    index["level"].lower().replace("_", " ")
-                )
+                self.data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
                 self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
                 self.data[ATTR_CAQI_ADVICE] = index["advice"]
                 _LOGGER.debug("Data retrieved from Airly")
