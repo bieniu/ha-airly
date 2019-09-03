@@ -43,84 +43,93 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_ATTRIBUTION = {
+ATTR_CAQI = "CAQI"
+ATTR_CAQI_ADVICE = "advice"
+ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
+ATTR_CAQI_LEVEL = "level"
+ATTR_ICON = "icon"
+ATTR_DEVICE_CLASS = "device_class"
+ATTR_LABEL = "label"
+ATTR_LIMIT = "limit"
+ATTR_PERCENT = "percent"
+ATTR_PM1 = "PM1"
+ATTR_PM10 = "PM10"
+ATTR_PM10_LIMIT = "PM10_LIMIT"
+ATTR_PM10_PERCENT = "PM10_PERCENT"
+ATTR_PM25 = "PM25"
+ATTR_PM25_LIMIT = "PM25_LIMIT"
+ATTR_PM25_PERCENT = "PM25_PERCENT"
+ATTR_HUMIDITY = "HUMIDITY"
+ATTR_PRESSURE = "PRESSURE"
+ATTR_TEMPERATURE = "TEMPERATURE"
+ATTR_UNIT = "unit"
+
+DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
+
+HUMI_PERCENT = "%"
+VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
+
+ATTRIBUTION = {
     "en": "Data provided by Airly",
     "pl": "Dane dostarczone przez Airly",
 }
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
-
-VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
-HUMI_PERCENT = "%"
-
-ATTR_PM1 = "PM1"
-ATTR_PM25 = "PM25"
-ATTR_PM10 = "PM10"
-ATTR_TEMPERATURE = "TEMPERATURE"
-ATTR_HUMIDITY = "HUMIDITY"
-ATTR_PRESSURE = "PRESSURE"
-ATTR_CAQI = "CAQI"
-ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
-ATTR_PM25_LIMIT = "PM25_LIMIT"
-ATTR_PM25_PERCENT = "PM25_PERCENT"
-ATTR_PM10_LIMIT = "PM10_LIMIT"
-ATTR_PM10_PERCENT = "PM10_PERCENT"
-ATTR_LABEL = "label"
-ATTR_ICON = "icon"
-ATTR_UNIT = "unit"
-ATTR_LIMIT = "limit"
-ATTR_PERCENT = "percent"
-ATTR_CAQI_LEVEL = "level"
-ATTR_CAQI_ADVICE = "advice"
-
-AVAILABLE_CONDITIONS = [
-    ATTR_PM1,
-    ATTR_PM25,
-    ATTR_PM10,
-    ATTR_CAQI,
-    ATTR_CAQI_DESCRIPTION,
-    ATTR_PRESSURE,
-    ATTR_HUMIDITY,
-    ATTR_TEMPERATURE,
-]
 
 SENSOR_TYPES = {
-    ATTR_PM1: {
-        ATTR_LABEL: ATTR_PM1,
-        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
-        ATTR_ICON: "mdi:blur",
-    },
-    ATTR_PM25: {
-        ATTR_LABEL: "PM2.5",
-        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
-        ATTR_ICON: "mdi:blur",
-    },
-    ATTR_PM10: {
-        ATTR_LABEL: ATTR_PM10,
-        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
-        ATTR_ICON: "mdi:blur",
-    },
-    ATTR_PRESSURE: {
-        ATTR_LABEL: ATTR_PRESSURE.capitalize(),
-        ATTR_UNIT: PRESSURE_HPA,
-        ATTR_ICON: "mdi:gauge",
-    },
-    ATTR_HUMIDITY: {
-        ATTR_LABEL: ATTR_HUMIDITY.capitalize(),
-        ATTR_UNIT: HUMI_PERCENT,
-        ATTR_ICON: "mdi:water-percent",
-    },
-    ATTR_TEMPERATURE: {
-        ATTR_LABEL: ATTR_TEMPERATURE.capitalize(),
-        ATTR_UNIT: TEMP_CELSIUS,
-        ATTR_ICON: "mdi:thermometer",
-    },
-    ATTR_CAQI: {ATTR_LABEL: ATTR_CAQI, ATTR_UNIT: None, ATTR_ICON: None},
+    ATTR_CAQI: {ATTR_DEVICE_CLASS: None, ATTR_ICON: None, ATTR_LABEL: ATTR_CAQI, ATTR_UNIT: None},
     ATTR_CAQI_DESCRIPTION: {
+        ATTR_DEVICE_CLASS: None,
+        ATTR_ICON: "mdi:card-text-outline",
         ATTR_LABEL: ATTR_CAQI_DESCRIPTION.capitalize(),
         ATTR_UNIT: None,
-        ATTR_ICON: "mdi:card-text-outline",
+    },
+    ATTR_PM1: {
+        ATTR_DEVICE_CLASS: None,
+        ATTR_ICON: "mdi:blur",
+        ATTR_LABEL: ATTR_PM1,
+        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
+    },
+    ATTR_PM10: {
+        ATTR_DEVICE_CLASS: None,
+        ATTR_ICON: "mdi:blur",
+        ATTR_LABEL: ATTR_PM10,
+        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
+    },
+    ATTR_PM25: {
+        ATTR_DEVICE_CLASS: None,
+        ATTR_ICON: "mdi:blur",
+        ATTR_LABEL: "PM2.5",
+        ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
+    },
+    ATTR_HUMIDITY: {
+        ATTR_DEVICE_CLASS: ATTR_HUMIDITY,
+        ATTR_ICON: "mdi:water-percent",
+        ATTR_LABEL: ATTR_HUMIDITY.capitalize(),
+        ATTR_UNIT: HUMI_PERCENT,
+    },
+    ATTR_PRESSURE: {
+        ATTR_DEVICE_CLASS: ATTR_PRESSURE,
+        ATTR_ICON: "mdi:gauge",
+        ATTR_LABEL: ATTR_PRESSURE.capitalize(),
+        ATTR_UNIT: PRESSURE_HPA,
+    },
+    ATTR_TEMPERATURE: {
+        ATTR_DEVICE_CLASS: ATTR_TEMPERATURE,
+        ATTR_ICON: "mdi:thermometer",
+        ATTR_LABEL: ATTR_TEMPERATURE.capitalize(),
+        ATTR_UNIT: TEMP_CELSIUS,
     },
 }
+
+AVAILABLE_CONDITIONS = [
+    ATTR_CAQI,
+    ATTR_CAQI_DESCRIPTION,
+    ATTR_PM1,
+    ATTR_PM10,
+    ATTR_PM25,
+    ATTR_HUMIDITY,
+    ATTR_PRESSURE,
+    ATTR_TEMPERATURE,
+]
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -192,11 +201,11 @@ class AirlySensor(Entity):
         self.data = airly.data
         self._name = name
         self.kind = kind
-        self._state = None
         self._device_class = None
+        self._state = None
         self._icon = None
         self._unit_of_measurement = None
-        self._attrs = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION[self.airly.language]}
+        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION[self.airly.language]}
 
     @property
     def name(self):
@@ -249,13 +258,7 @@ class AirlySensor(Entity):
     @property
     def device_class(self):
         """Return the device_class."""
-        if self.kind == ATTR_TEMPERATURE:
-            self._device_class = DEVICE_CLASS_TEMPERATURE
-        elif self.kind == ATTR_HUMIDITY:
-            self._device_class = DEVICE_CLASS_HUMIDITY
-        elif self.kind == ATTR_PRESSURE:
-            self._device_class = DEVICE_CLASS_PRESSURE
-        return self._device_class
+        return SENSOR_TYPES[self.kind][ATTR_DEVICE_CLASS]
 
     @property
     def unique_id(self):
