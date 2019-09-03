@@ -6,13 +6,13 @@ https://github.com/bieniu/ha-airly
 """
 
 import asyncio
-import async_timeout
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
+import async_timeout
+import voluptuous as vol
 from airly import Airly
 from airly.exceptions import AirlyError
-import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
@@ -60,17 +60,17 @@ ATTR_HUMIDITY = "HUMIDITY"
 ATTR_PRESSURE = "PRESSURE"
 ATTR_CAQI = "CAQI"
 ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
-ATTR_PM25_LIMIT = "pm25_limit"
-ATTR_PM25_PERCENT = "pm25_percent"
-ATTR_PM10_LIMIT = "pm10_limit"
-ATTR_PM10_PERCENT = "pm10_percent"
+ATTR_PM25_LIMIT = "PM25_LIMIT"
+ATTR_PM25_PERCENT = "PM25_PERCENT"
+ATTR_PM10_LIMIT = "PM10_LIMIT"
+ATTR_PM10_PERCENT = "PM10_PERCENT"
+ATTR_LABEL = "label"
+ATTR_ICON = "icon"
+ATTR_UNIT = "unit"
 ATTR_LIMIT = "limit"
 ATTR_PERCENT = "percent"
 ATTR_CAQI_LEVEL = "level"
 ATTR_CAQI_ADVICE = "advice"
-ATTR_LABEL = "label"
-ATTR_ICON = "icon"
-ATTR_UNIT = "unit"
 
 AVAILABLE_CONDITIONS = [
     ATTR_PM1,
@@ -305,24 +305,24 @@ class AirlyData:
                 )
 
                 await measurements.update()
+
             values = measurements.current["values"]
             standards = measurements.current["standards"]
-            indexes = measurements.current["indexes"]
+            index = measurements.current["indexes"][0]
 
-            if indexes[0]["description"] != NO_AIRLY_SENSORS:
+            if index["description"] != NO_AIRLY_SENSORS:
                 for value in values:
                     self.data[value["name"]] = value["value"]
-                self.data[ATTR_PM25_LIMIT] = standards[0]["limit"]
-                self.data[ATTR_PM25_PERCENT] = standards[0]["percent"]
-                self.data[ATTR_PM10_LIMIT] = standards[1]["limit"]
-                self.data[ATTR_PM10_PERCENT] = standards[1]["percent"]
-                self.data[ATTR_CAQI] = indexes[0]["value"]
+                for standard in standards:
+                    self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
+                    self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
+                self.data[ATTR_CAQI] = index["value"]
                 self.data[ATTR_CAQI_LEVEL] = (
-                    indexes[0]["level"].lower().replace("_", " ")
+                    index["level"].lower().replace("_", " ")
                 )
-                self.data[ATTR_CAQI_DESCRIPTION] = indexes[0]["description"]
-                self.data[ATTR_CAQI_ADVICE] = indexes[0]["advice"]
-                _LOGGER.debug("Data retrieved fromAirly")
+                self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
+                self.data[ATTR_CAQI_ADVICE] = index["advice"]
+                _LOGGER.debug("Data retrieved from Airly")
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
         except (ValueError, AirlyError, asyncio.TimeoutError) as error:

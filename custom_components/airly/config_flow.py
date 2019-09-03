@@ -1,9 +1,8 @@
 """Adds config flow for Airly."""
 import async_timeout
-
+import voluptuous as vol
 from airly import Airly
 from airly.exceptions import AirlyError
-import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME
