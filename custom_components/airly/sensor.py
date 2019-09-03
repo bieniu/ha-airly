@@ -270,16 +270,13 @@ class AirlySensor(Entity):
         """Get the data from Airly."""
         await self.airly.async_update()
 
-        if not self.airly.data:
-            return
-
 
 class AirlyData:
     """Define an object to hold sensor data."""
 
-    def __init__(self, client, api_key, latitude, longitude, language, **kwargs):
+    def __init__(self, session, api_key, latitude, longitude, language, **kwargs):
         """Initialize."""
-        self.client = client
+        self.session = session
         self.latitude = latitude
         self.longitude = longitude
         self.language = language
@@ -293,7 +290,7 @@ class AirlyData:
 
         try:
             with async_timeout.timeout(10):
-                airly = Airly(self.api_key, self.client, language=self.language)
+                airly = Airly(self.api_key, self.session, language=self.language)
                 measurements = airly.create_measurements_session_point(
                     self.latitude, self.longitude
                 )
