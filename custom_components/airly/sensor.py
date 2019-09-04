@@ -17,6 +17,7 @@ from airly.exceptions import AirlyError
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
+    ATTR_DEVICE_CLASS,
     CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
@@ -48,7 +49,6 @@ ATTR_CAQI_ADVICE = "advice"
 ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
 ATTR_CAQI_LEVEL = "level"
 ATTR_ICON = "icon"
-ATTR_DEVICE_CLASS = "device_class"
 ATTR_LABEL = "label"
 ATTR_LIMIT = "limit"
 ATTR_PERCENT = "percent"
@@ -103,19 +103,19 @@ SENSOR_TYPES = {
         ATTR_UNIT: VOLUME_MICROGRAMS_PER_CUBIC_METER,
     },
     ATTR_HUMIDITY: {
-        ATTR_DEVICE_CLASS: ATTR_HUMIDITY,
+        ATTR_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
         ATTR_ICON: "mdi:water-percent",
         ATTR_LABEL: ATTR_HUMIDITY.capitalize(),
         ATTR_UNIT: HUMI_PERCENT,
     },
     ATTR_PRESSURE: {
-        ATTR_DEVICE_CLASS: ATTR_PRESSURE,
+        ATTR_DEVICE_CLASS: DEVICE_CLASS_PRESSURE,
         ATTR_ICON: "mdi:gauge",
         ATTR_LABEL: ATTR_PRESSURE.capitalize(),
         ATTR_UNIT: PRESSURE_HPA,
     },
     ATTR_TEMPERATURE: {
-        ATTR_DEVICE_CLASS: ATTR_TEMPERATURE,
+        ATTR_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
         ATTR_ICON: "mdi:thermometer",
         ATTR_LABEL: ATTR_TEMPERATURE.capitalize(),
         ATTR_UNIT: TEMP_CELSIUS,
