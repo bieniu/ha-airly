@@ -4,13 +4,13 @@
         "step": {
             "user": {
                 "title": "Airly",
-                "description": "Jeśli potrzebujesz pomocy z konfiguracją, przejdź na stronę: https://github.com/bieniu/ha-airly",
+                "description": "Konfiguracja integracji Airly. By wygenerować klucz API przejdź na stronę https://developer.airly.eu/register",
                 "data": {
                     "name": "Nazwa integracji",
                     "api_key": "Klucz API Airly",
                     "latitude": "Szerokość geograficzna",
                     "longitude": "Długość geograficzna",
-                    "language": "Język API (en i pl są wspierane)"
+                    "language": "Język wiadomości API (en i pl są wspierane)"
                 }
             }
         },

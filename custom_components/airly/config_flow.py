@@ -45,7 +45,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         websession = async_get_clientsession(self.hass)
 
         if user_input is not None:
-            if user_input[CONF_NAME] not in configured_instances(self.hass):
+            if user_input[CONF_NAME] in configured_instances(self.hass):
                 self._errors[CONF_NAME] = "name_exists"
             if not user_input[CONF_LANGUAGE] in LANGUAGE_CODES:
                 self._errors["base"] = "wrong_lang"

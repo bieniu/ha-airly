@@ -4,13 +4,13 @@
         "step": {
             "user": {
                 "title": "Airly",
-                "description": "If you need help with the configuration have a look here: https://github.com/bieniu/ha-airly",
+                "description": "Set up Airly air quality integration. To generate API key go to https://developer.airly.eu/register",
                 "data": {
                     "name": "Name of the integration",
                     "api_key": "Airly API key",
                     "latitude": "Latitude",
                     "longitude": "Longitude",
-                    "language": "API language (en and pl are supported)"
+                    "language": "API messages language (en and pl are supported)"
                 }
             }
         },
