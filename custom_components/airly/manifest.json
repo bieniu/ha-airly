@@ -1,12 +1,10 @@
 {
-    "domain": "airly",
-    "name": "Airly",
-    "documentation": "https://github.com/bieniu/ha-airly",
-    "dependencies": [],
-    "codeowners": [
-        "@bieniu"
-    ],
-    "homeassistant": "0.98.0",
-    "requirements": ["airly==0.0.2"],
-    "config_flow": true
+  "domain": "airly",
+  "name": "Airly",
+  "documentation": "https://github.com/bieniu/ha-airly",
+  "dependencies": [],
+  "codeowners": ["@bieniu"],
+  "homeassistant": "0.98.0",
+  "requirements": ["airly==0.0.2"],
+  "config_flow": true
 }
