@@ -1,4 +1,5 @@
 """Adds config flow for Airly."""
+
 import async_timeout
 import voluptuous as vol
 from airly import Airly
@@ -105,11 +106,11 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             measurements = airly.create_measurements_session_point(
                 latitude=52.24131, longitude=20.99101
             )
-        try:
-            await measurements.update()
-        except AirlyError:
-            return False
-        return True
+            try:
+                await measurements.update()
+            except AirlyError:
+                return False
+            return True
 
     async def _test_location(self, client, api_key, latitude, longitude):
         """Return true if location is valid."""
