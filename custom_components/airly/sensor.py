@@ -143,7 +143,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     language = config[CONF_LANGUAGE]
     scan_interval = config[CONF_SCAN_INTERVAL]
-    _LOGGER.debug("Using latitude and longitude: %s, %s", latitude, longitude)
 
     websession = async_get_clientsession(hass)
 
