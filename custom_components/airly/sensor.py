@@ -280,12 +280,8 @@ class AirlyData:
         self.longitude = longitude
         self.language = language
         self.api_key = api_key
+        self.airly = Airly(self.api_key, self.session, language=self.language)
         self.data = {}
-
-        airly = Airly(self.api_key, self.session, language=self.language)
-        self.measurements = airly.create_measurements_session_point(
-            self.latitude, self.longitude
-        )
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
 
@@ -294,11 +290,14 @@ class AirlyData:
 
         try:
             with async_timeout.timeout(10):
-                await self.measurements.update()
+                measurements = self.airly.create_measurements_session_point(
+                    self.latitude, self.longitude
+                )
+                await measurements.update()
 
-            values = self.measurements.current["values"]
-            standards = self.measurements.current["standards"]
-            index = self.measurements.current["indexes"][0]
+            values = measurements.current["values"]
+            standards = measurements.current["standards"]
+            index = measurements.current["indexes"][0]
 
             if index["description"] != NO_AIRLY_SENSORS:
                 for value in values:
