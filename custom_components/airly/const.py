@@ -1,5 +1,4 @@
 """Constants for Airly integration."""
-
 CONF_LANGUAGE = "language"
 DEFAULT_LANGUAGE = "en"
 DEFAULT_NAME = "Airly"

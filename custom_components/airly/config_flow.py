@@ -1,5 +1,4 @@
 """Adds config flow for Airly."""
-
 import async_timeout
 import voluptuous as vol
 from airly import Airly
