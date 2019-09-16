@@ -200,15 +200,15 @@ class AirlySensor(Entity):
     def device_state_attributes(self):
         """Return the state attributes."""
         if self.kind == ATTR_CAQI_DESCRIPTION:
-            self._attrs.update({ATTR_CAQI_ADVICE: self.data[ATTR_CAQI_ADVICE]})
+            self._attrs[ATTR_CAQI_ADVICE] = self.data[ATTR_CAQI_ADVICE]
         if self.kind == ATTR_CAQI:
-            self._attrs.update({ATTR_CAQI_LEVEL: self.data[ATTR_CAQI_LEVEL]})
+            self._attrs[ATTR_CAQI_LEVEL] = self.data[ATTR_CAQI_LEVEL]
         if self.kind == ATTR_PM25:
-            self._attrs.update({ATTR_LIMIT: self.data[ATTR_PM25_LIMIT]})
-            self._attrs.update({ATTR_PERCENT: round(self.data[ATTR_PM25_PERCENT])})
+            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM25_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM25_PERCENT])
         if self.kind == ATTR_PM10:
-            self._attrs.update({ATTR_LIMIT: self.data[ATTR_PM10_LIMIT]})
-            self._attrs.update({ATTR_PERCENT: round(self.data[ATTR_PM10_PERCENT])})
+            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM10_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM10_PERCENT])
         return self._attrs
 
     @property
