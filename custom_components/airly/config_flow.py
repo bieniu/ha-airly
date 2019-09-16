@@ -97,6 +97,13 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
 
+    async def async_step_import(self, import_config):
+        """Import a config entry from configuration.yaml."""
+        if self._async_current_entries():
+            return self.async_abort(reason="single_instance_allowed")
+
+        return self.async_create_entry(title="configuration.yaml", data=import_config)
+
     async def _test_api_key(self, client, api_key):
         """Return true if api_key is valid."""
 

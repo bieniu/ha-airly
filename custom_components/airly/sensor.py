@@ -13,6 +13,7 @@ import voluptuous as vol
 from airly import Airly
 from airly.exceptions import AirlyError
 
+from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
@@ -37,6 +38,7 @@ from .const import (
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
+    DOMAIN,
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,
 )
@@ -128,33 +130,17 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_LONGITUDE): cv.longitude,
         vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
     }
 )
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
-
-    name = config[CONF_NAME]
-    api_key = config[CONF_API_KEY]
-    latitude = config.get(CONF_LATITUDE, hass.config.latitude)
-    longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
-    language = config[CONF_LANGUAGE]
-    scan_interval = config[CONF_SCAN_INTERVAL]
-
-    websession = async_get_clientsession(hass)
-
-    data = AirlyData(
-        websession, api_key, latitude, longitude, language, scan_interval=scan_interval
+    hass.async_create_task(
+        hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
+        )
     )
-
-    await data.async_update()
-
-    sensors = []
-    for sensor in SENSOR_TYPES:
-        sensors.append(AirlySensor(data, name, sensor))
-    async_add_entities(sensors, True)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
