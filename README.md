@@ -26,7 +26,6 @@ sensor:
     latitude: !secret latitude
     longitude: !secret longitude
     language: 'pl'
-    scan_interval: 300
 ```
 
 ## Arguments
@@ -38,7 +37,6 @@ key | optional | type | default | description
 `latitude` | True | string | latitude from HA config | latitude of the location to monitor
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
 `language` | True | string | `en` | language, available `en` and `pl`
-`scan_interval` | True | integer | 600 | rate in seconds at which Airly should be polled for new data
 
 
 [releases]: https://github.com/bieniu/ha-airly/releases
