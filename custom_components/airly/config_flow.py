@@ -5,18 +5,13 @@ from airly import Airly
 from airly.exceptions import AirlyError
 
 from homeassistant import config_entries
-from homeassistant.const import (
-    CONF_API_KEY,
-    CONF_LATITUDE,
-    CONF_LONGITUDE,
-    CONF_NAME,
-    CONF_SCAN_INTERVAL,
-)
+from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_NAME
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
+    _LOGGER,
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
@@ -39,12 +34,6 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        """Get the options flow for this handler."""
-        return AirlyOptionsFlowHandler(config_entry)
 
     def __init__(self):
         """Initialize."""
@@ -113,7 +102,8 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Import a config entry from configuration.yaml."""
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
-
+        _LOGGER.warning("Airly configuration from configuration.yaml was imported to \
+            integrations. You can safely remove configuration from configuration.yaml.")
         return self.async_create_entry(title="configuration.yaml", data=import_config)
 
     async def _test_api_key(self, client, api_key):
@@ -144,32 +134,3 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if current["indexes"][0]["description"] == NO_AIRLY_SENSORS:
             return False
         return True
-
-
-class AirlyOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle Airly options."""
-
-    def __init__(self, config_entry):
-        """Initialize Airly options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(self, user_input=None):
-        """Manage the options."""
-        return await self.async_step_user()
-
-    async def async_step_user(self, user_input=None):
-        """Handle a flow initialized by the user."""
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        CONF_LANGUAGE,
-                        default=self.config_entry.options.get(CONF_LANGUAGE),
-                    ): vol.In(LANGUAGE_CODES)
-                }
-            ),
-        )

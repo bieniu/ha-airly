@@ -1,4 +1,7 @@
 """Constants for Airly integration."""
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 CONF_LANGUAGE = "language"
 DEFAULT_LANGUAGE = "en"
 DEFAULT_NAME = "Airly"

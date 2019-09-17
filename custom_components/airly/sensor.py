@@ -5,7 +5,6 @@ For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-airly
 """
 import asyncio
-import logging
 from datetime import timedelta
 
 import async_timeout
@@ -35,6 +34,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const import (
+    _LOGGER,
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
@@ -42,8 +42,6 @@ from .const import (
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 ATTR_CAQI = "CAQI"
 ATTR_CAQI_ADVICE = "advice"
