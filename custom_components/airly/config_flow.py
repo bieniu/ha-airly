@@ -113,7 +113,6 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Import a config entry from configuration.yaml."""
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
-        del import_config[CONF_SCAN_INTERVAL]
 
         return self.async_create_entry(title="configuration.yaml", data=import_config)
 

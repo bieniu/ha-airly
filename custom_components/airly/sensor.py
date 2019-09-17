@@ -136,6 +136,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configure the platform and add the sensors."""
+    del config[CONF_SCAN_INTERVAL]
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
