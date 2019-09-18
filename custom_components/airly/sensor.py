@@ -38,6 +38,7 @@ from .const import (
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LANGUAGE_CODES,
     NO_AIRLY_SENSORS,
@@ -62,8 +63,6 @@ ATTR_HUMIDITY = "HUMIDITY"
 ATTR_PRESSURE = "PRESSURE"
 ATTR_TEMPERATURE = "TEMPERATURE"
 ATTR_UNIT = "unit"
-
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
 
 HUMI_PERCENT = "%"
 VOLUME_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
@@ -149,12 +148,20 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data[CONF_LANGUAGE]
-    scan_interval = DEFAULT_SCAN_INTERVAL
+    try:
+        scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
+    except KeyError:
+        scan_interval = DEFAULT_SCAN_INTERVAL
 
     websession = async_get_clientsession(hass)
 
     data = AirlyData(
-        websession, api_key, latitude, longitude, language, scan_interval=scan_interval
+        websession,
+        api_key,
+        latitude,
+        longitude,
+        language,
+        scan_interval=timedelta(seconds=scan_interval),
     )
 
     await data.async_update()
