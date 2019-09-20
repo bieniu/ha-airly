@@ -21,6 +21,7 @@ async def async_unload_entry(hass, config_entry):
     await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
     return True
 
+
 async def update_listener(hass, entry):
     """Update listener."""
     await hass.config_entries.async_forward_entry_unload(entry, "sensor")

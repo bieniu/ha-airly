@@ -115,7 +115,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
         _LOGGER.warning(
-            "Airly configuration from configuration.yaml was imported to " \
+            "Airly configuration from configuration.yaml was imported to "
             "integrations. You can safely remove configuration from configuration.yaml."
         )
         return self.async_create_entry(title="configuration.yaml", data=import_config)
