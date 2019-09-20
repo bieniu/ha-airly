@@ -24,7 +24,7 @@
     "step": {
       "user": {
         "data": {
-          "scan_interval": "Scan interval"
+          "scan_interval": "Scan interval [s]"
         }
       }
     }
