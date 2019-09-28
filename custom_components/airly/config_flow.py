@@ -1,4 +1,6 @@
 """Adds config flow for Airly."""
+import logging
+
 import async_timeout
 import voluptuous as vol
 from airly import Airly
@@ -17,7 +19,6 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
-    _LOGGER,
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
@@ -27,6 +28,7 @@ from .const import (
     NO_AIRLY_SENSORS,
 )
 
+_LOGGER = logging.getLogger(__name__)
 
 @callback
 def configured_instances(hass):
