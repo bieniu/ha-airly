@@ -24,7 +24,7 @@
     "step": {
       "user": {
         "data": {
-          "scan_interval": "Interwał skanowania [s]"
+          "scan_interval": "Częstotliwość aktualizacji [s]"
         }
       }
     }
