@@ -111,6 +111,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        """Airly options callback."""
         return AirlyOptionsFlowHandler(config_entry)
 
     async def async_step_import(self, import_config):
@@ -154,6 +155,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class AirlyOptionsFlowHandler(config_entries.OptionsFlow):
+    """Config flow options for Airly."""
     def __init__(self, config_entry):
         """Initialize Airly options flow."""
         self.config_entry = config_entry

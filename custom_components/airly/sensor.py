@@ -8,7 +8,7 @@ import asyncio
 from datetime import timedelta
 import logging
 
-import aiohttp
+import aiohttp.client_exceptions.ClientConnectorError as ClientConnectorError
 import async_timeout
 import voluptuous as vol
 from airly import Airly
@@ -306,11 +306,6 @@ class AirlyData:
                 _LOGGER.debug("Data retrieved from Airly")
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-        except (
-            ValueError,
-            AirlyError,
-            asyncio.TimeoutError,
-            aiohttp.client_exceptions.ClientConnectorError,
-        ) as error:
+        except (ValueError, AirlyError, asyncio.TimeoutError, ClientConnectorError) as error:
             _LOGGER.error(error)
             self.data = {}
