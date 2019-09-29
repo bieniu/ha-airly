@@ -156,6 +156,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 class AirlyOptionsFlowHandler(config_entries.OptionsFlow):
     """Config flow options for Airly."""
+
     def __init__(self, config_entry):
         """Initialize Airly options flow."""
         self.config_entry = config_entry

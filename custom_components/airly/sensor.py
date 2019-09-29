@@ -306,6 +306,11 @@ class AirlyData:
                 _LOGGER.debug("Data retrieved from Airly")
             else:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-        except (ValueError, AirlyError, asyncio.TimeoutError, ClientConnectorError) as error:
+        except (
+            ValueError,
+            AirlyError,
+            asyncio.TimeoutError,
+            ClientConnectorError,
+        ) as error:
             _LOGGER.error(error)
             self.data = {}
