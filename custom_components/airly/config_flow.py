@@ -30,6 +30,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
 @callback
 def configured_instances(hass):
     """Return a set of configured Airly instances."""
