@@ -8,9 +8,9 @@ import asyncio
 from datetime import timedelta
 import logging
 
-from aiohttp.client_exceptions import ClientConnectorError
 import async_timeout
 import voluptuous as vol
+from aiohttp.client_exceptions import ClientConnectorError
 from airly import Airly
 from airly.exceptions import AirlyError
 
