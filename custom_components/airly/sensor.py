@@ -223,16 +223,17 @@ class AirlySensor(Entity):
     def icon(self):
         """Return the icon."""
         if self.kind == ATTR_CAQI:
-            if self._state <= 25:
-                self._icon = "mdi:emoticon-excited"
-            elif self._state <= 50:
-                self._icon = "mdi:emoticon-happy"
-            elif self._state <= 75:
-                self._icon = "mdi:emoticon-neutral"
-            elif self._state <= 100:
-                self._icon = "mdi:emoticon-sad"
-            elif self._state > 100:
-                self._icon = "mdi:emoticon-dead"
+            if isinstance(self._state, int):
+                if self._state <= 25:
+                    self._icon = "mdi:emoticon-excited"
+                elif self._state <= 50:
+                    self._icon = "mdi:emoticon-happy"
+                elif self._state <= 75:
+                    self._icon = "mdi:emoticon-neutral"
+                elif self._state <= 100:
+                    self._icon = "mdi:emoticon-sad"
+                elif self._state > 100:
+                    self._icon = "mdi:emoticon-dead"
         else:
             self._icon = SENSOR_TYPES[self.kind][ATTR_ICON]
         return self._icon
@@ -270,7 +271,7 @@ class AirlyData:
         self.latitude = latitude
         self.longitude = longitude
         self.language = language
-        self.airly = Airly(api_key, session, language=language)
+        self.airly = Airly(api_key, session, language=self.language)
         self.data = {}
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
