@@ -168,8 +168,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         scan_interval=timedelta(seconds=scan_interval),
     )
 
-    await data.async_update()
-
     sensors = []
     for sensor in SENSOR_TYPES:
         sensors.append(AirlySensor(data, name, sensor))
@@ -269,12 +267,10 @@ class AirlyData:
 
     def __init__(self, session, api_key, latitude, longitude, language, **kwargs):
         """Initialize."""
-        self.session = session
         self.latitude = latitude
         self.longitude = longitude
         self.language = language
-        self.api_key = api_key
-        self.airly = Airly(self.api_key, self.session, language=self.language)
+        self.airly = Airly(api_key, session, language=language)
         self.data = {}
 
         self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
@@ -293,19 +289,19 @@ class AirlyData:
             standards = measurements.current["standards"]
             index = measurements.current["indexes"][0]
 
-            if index["description"] != NO_AIRLY_SENSORS:
-                for value in values:
-                    self.data[value["name"]] = value["value"]
-                for standard in standards:
-                    self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
-                    self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
-                self.data[ATTR_CAQI] = index["value"]
-                self.data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
-                self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
-                self.data[ATTR_CAQI_ADVICE] = index["advice"]
-                _LOGGER.debug("Data retrieved from Airly")
-            else:
+            if index["description"] == NO_AIRLY_SENSORS[self.language]:
                 _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
+                return
+            for value in values:
+                self.data[value["name"]] = value["value"]
+            for standard in standards:
+                self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
+                self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
+            self.data[ATTR_CAQI] = index["value"]
+            self.data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
+            self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
+            self.data[ATTR_CAQI_ADVICE] = index["advice"]
+            _LOGGER.debug("Data retrieved from Airly")
         except (
             ValueError,
             AirlyError,
