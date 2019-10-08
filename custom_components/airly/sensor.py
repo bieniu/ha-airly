@@ -262,6 +262,9 @@ class AirlySensor(Entity):
         """Get the data from Airly."""
         await self.airly.async_update()
 
+        if self.airly.data:
+            self.data = self.airly.data
+
 
 class AirlyData:
     """Define an object to hold sensor data."""
@@ -278,7 +281,6 @@ class AirlyData:
 
     async def _async_update(self):
         """Update Airly data."""
-
         try:
             with async_timeout.timeout(10):
                 measurements = self.airly.create_measurements_session_point(
