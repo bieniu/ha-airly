@@ -105,19 +105,19 @@ SENSOR_TYPES = {
     },
     ATTR_HUMIDITY: {
         ATTR_DEVICE_CLASS: DEVICE_CLASS_HUMIDITY,
-        ATTR_ICON: "mdi:water-percent",
+        ATTR_ICON: None,
         ATTR_LABEL: ATTR_HUMIDITY.capitalize(),
         ATTR_UNIT: HUMI_PERCENT,
     },
     ATTR_PRESSURE: {
         ATTR_DEVICE_CLASS: DEVICE_CLASS_PRESSURE,
-        ATTR_ICON: "mdi:gauge",
+        ATTR_ICON: None,
         ATTR_LABEL: ATTR_PRESSURE.capitalize(),
         ATTR_UNIT: PRESSURE_HPA,
     },
     ATTR_TEMPERATURE: {
         ATTR_DEVICE_CLASS: DEVICE_CLASS_TEMPERATURE,
-        ATTR_ICON: "mdi:thermometer",
+        ATTR_ICON: None,
         ATTR_LABEL: ATTR_TEMPERATURE.capitalize(),
         ATTR_UNIT: TEMP_CELSIUS,
     },
