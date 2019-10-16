@@ -35,4 +35,5 @@ key | optional | type | default | description
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
 `language` | True | string | `en` | language, available `en` and `pl`
 
+
 <a href="https://www.buymeacoffee.com/QnLdxeaqO" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
