@@ -1,12 +1,17 @@
+## This integration is deprecated
+Home Assistant 0.101 and newer includes official Airly integration.
+Differences between the official and custom version:
+- no configurable `scan_interval`
+- no API messages in Polish language
+- some sensors are represented in `air_quality` entity
+These differences result from the requirements for official integrations. You can still use the custom version of component. If you want to use the official version, remove integration from Configuration -> Integrations and component files from the `/config/custom_components` folder and restart Home Assistant.
+
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 You can add this integration to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
 
 ## API Key
 To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
-
-## Breaking change
-Home Assistant 0.98+ allows disabling unnecessary entities in the entity registry. For this reason, the `monitored_conditions` argument has been removed.
 
 ## Minimal configuration
 ```yaml

@@ -3,6 +3,14 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![Community Forum][forum-shield]][forum]
 
+## This integration is deprecated
+Home Assistant 0.101 and newer includes official Airly integration.
+Differences between the official and custom version:
+- no configurable `scan_interval`
+- no API messages in Polish language
+- some sensors are represented in `air_quality` entity
+These differences result from the requirements for official integrations. You can still use the custom version of component. If you want to use the official version, remove integration from Configuration -> Integrations and component files from the `/config/custom_components` folder and restart Home Assistant.
+
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 The integration collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
