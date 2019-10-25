@@ -9,6 +9,7 @@ Differences between the official and custom version:
 - no configurable `scan_interval`
 - no API messages in Polish language
 - some sensors are represented in `air_quality` entity
+
 These differences result from the requirements for official integrations. You can still use the custom version of component. If you want to use the official version, remove integration from Configuration -> Integrations and component files from the `/config/custom_components` folder and restart Home Assistant.
 
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
