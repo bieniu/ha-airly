@@ -4,16 +4,15 @@ Support for the Airly service.
 For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-airly
 """
-import asyncio
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
-import async_timeout
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from aiohttp.client_exceptions import ClientConnectorError
 from airly import Airly
 from airly.exceptions import AirlyError
-
+from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
@@ -31,7 +30,6 @@ from homeassistant.const import (
     TEMP_CELSIUS,
 )
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
@@ -282,7 +280,7 @@ class AirlyData:
     async def _async_update(self):
         """Update Airly data."""
         try:
-            with async_timeout.timeout(10):
+            with timeout(None):
                 measurements = self.airly.create_measurements_session_point(
                     self.latitude, self.longitude
                 )
@@ -305,11 +303,6 @@ class AirlyData:
             self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
             self.data[ATTR_CAQI_ADVICE] = index["advice"]
             _LOGGER.debug("Data retrieved from Airly")
-        except (
-            ValueError,
-            AirlyError,
-            asyncio.TimeoutError,
-            ClientConnectorError,
-        ) as error:
+        except (ValueError, AirlyError, ClientConnectorError) as error:
             _LOGGER.error(error)
             self.data = {}

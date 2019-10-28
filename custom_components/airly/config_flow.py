@@ -1,11 +1,11 @@
 """Adds config flow for Airly."""
 import logging
 
-import async_timeout
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from airly import Airly
 from airly.exceptions import AirlyError
-
+from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import (
     CONF_API_KEY,
@@ -16,7 +16,6 @@ from homeassistant.const import (
 )
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-import homeassistant.helpers.config_validation as cv
 
 from .const import (
     CONF_LANGUAGE,
@@ -127,7 +126,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _test_api_key(self, client, api_key):
         """Return true if api_key is valid."""
 
-        with async_timeout.timeout(10):
+        with timeout(None):
             airly = Airly(api_key, client)
             measurements = airly.create_measurements_session_point(
                 latitude=52.24131, longitude=20.99101
@@ -141,7 +140,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def _test_location(self, client, api_key, latitude, longitude):
         """Return true if location is valid."""
 
-        with async_timeout.timeout(10):
+        with timeout(None):
             airly = Airly(api_key, client)
             measurements = airly.create_measurements_session_point(
                 latitude=latitude, longitude=longitude
