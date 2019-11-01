@@ -4,15 +4,8 @@ Support for the Airly service.
 For more details about this platform, please refer to the documentation at
 https://github.com/bieniu/ha-airly
 """
-import logging
-from datetime import timedelta
-
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from aiohttp.client_exceptions import ClientConnectorError
-from airly import Airly
-from airly.exceptions import AirlyError
-from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
@@ -29,26 +22,22 @@ from homeassistant.const import (
     PRESSURE_HPA,
     TEMP_CELSIUS,
 )
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
 
 from .const import (
+    ATTR_CAQI,
+    ATTR_CAQI_ADVICE,
+    ATTR_CAQI_DESCRIPTION,
+    ATTR_CAQI_LEVEL,
     CONF_LANGUAGE,
+    DATA_CLIENT,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LANGUAGE_CODES,
-    NO_AIRLY_SENSORS,
 )
 
-_LOGGER = logging.getLogger(__name__)
-
-ATTR_CAQI = "CAQI"
-ATTR_CAQI_ADVICE = "advice"
-ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
-ATTR_CAQI_LEVEL = "level"
 ATTR_ICON = "icon"
 ATTR_LABEL = "label"
 ATTR_LIMIT = "limit"
@@ -145,26 +134,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
-    api_key = config_entry.data[CONF_API_KEY]
     name = config_entry.data[CONF_NAME]
-    latitude = config_entry.data[CONF_LATITUDE]
-    longitude = config_entry.data[CONF_LONGITUDE]
-    language = config_entry.data[CONF_LANGUAGE]
-    try:
-        scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
-    except KeyError:
-        scan_interval = DEFAULT_SCAN_INTERVAL
 
-    websession = async_get_clientsession(hass)
-
-    data = AirlyData(
-        websession,
-        api_key,
-        latitude,
-        longitude,
-        language,
-        scan_interval=timedelta(seconds=scan_interval),
-    )
+    data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
 
     sensors = []
     for sensor in SENSOR_TYPES:
@@ -262,47 +234,3 @@ class AirlySensor(Entity):
 
         if self.airly.data:
             self.data = self.airly.data
-
-
-class AirlyData:
-    """Define an object to hold sensor data."""
-
-    def __init__(self, session, api_key, latitude, longitude, language, **kwargs):
-        """Initialize."""
-        self.latitude = latitude
-        self.longitude = longitude
-        self.language = language
-        self.airly = Airly(api_key, session, language=self.language)
-        self.data = {}
-
-        self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
-
-    async def _async_update(self):
-        """Update Airly data."""
-        try:
-            with timeout(None):
-                measurements = self.airly.create_measurements_session_point(
-                    self.latitude, self.longitude
-                )
-                await measurements.update()
-
-            values = measurements.current["values"]
-            standards = measurements.current["standards"]
-            index = measurements.current["indexes"][0]
-
-            if index["description"] == NO_AIRLY_SENSORS[self.language]:
-                _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-                return
-            for value in values:
-                self.data[value["name"]] = value["value"]
-            for standard in standards:
-                self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
-                self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
-            self.data[ATTR_CAQI] = index["value"]
-            self.data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
-            self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
-            self.data[ATTR_CAQI_ADVICE] = index["advice"]
-            _LOGGER.debug("Data retrieved from Airly")
-        except (ValueError, AirlyError, ClientConnectorError) as error:
-            _LOGGER.error(error)
-            self.data = {}
