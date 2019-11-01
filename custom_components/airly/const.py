@@ -1,5 +1,10 @@
 """Constants for Airly integration."""
+ATTR_CAQI = "CAQI"
+ATTR_CAQI_ADVICE = "advice"
+ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
+ATTR_CAQI_LEVEL = "level"
 CONF_LANGUAGE = "language"
+DATA_CLIENT = "client"
 DEFAULT_LANGUAGE = "en"
 DEFAULT_NAME = "Airly"
 DEFAULT_SCAN_INTERVAL = 600
