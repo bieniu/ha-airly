@@ -1,9 +1,4 @@
-"""
-Support for the Airly service.
-
-For more details about this platform, please refer to the documentation at
-https://github.com/bieniu/ha-airly
-"""
+"""Support for the Airly service."""
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import config_entries
