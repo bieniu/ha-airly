@@ -1,5 +1,6 @@
 # Airly
 [![GitHub Release][releases-shield]][releases]
+![GitHub All Releases](https://img.shields.io/github/downloads/bieniu/ha-airly/total)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 [![Community Forum][forum-shield]][forum]
 
