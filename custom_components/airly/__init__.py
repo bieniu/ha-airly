@@ -1,12 +1,13 @@
 """The Airly component."""
-import logging
 from asyncio import TimeoutError
 from datetime import timedelta
+import logging
 
 from aiohttp.client_exceptions import ClientConnectorError
 from airly import Airly
 from airly.exceptions import AirlyError
 from async_timeout import timeout
+
 from homeassistant.const import (
     CONF_API_KEY,
     CONF_LATITUDE,
