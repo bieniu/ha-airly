@@ -134,16 +134,23 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
 
+    if not data.data:
+        latitude = config_entry.data[CONF_LATITUDE]
+        longitude = config_entry.data[CONF_LONGITUDE]
+    else:
+        latitude = data.latitude
+        longitude = data.longitude
     sensors = []
     for sensor in SENSOR_TYPES:
-        sensors.append(AirlySensor(data, name, sensor))
+        unique_id = f"{latitude}-{longitude}-{sensor.lower()}"
+        sensors.append(AirlySensor(data, name, sensor, unique_id=unique_id))
     async_add_entities(sensors, True)
 
 
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, airly, name, kind):
+    def __init__(self, airly, name, kind, unique_id=None):
         """Initialize."""
         self.airly = airly
         self.data = airly.data
@@ -152,6 +159,7 @@ class AirlySensor(Entity):
         self._device_class = None
         self._state = None
         self._icon = None
+        self._unique_id = unique_id
         self._unit_of_measurement = None
         self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION[self.airly.language]}
 
@@ -212,7 +220,7 @@ class AirlySensor(Entity):
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
-        return f"{self.airly.latitude}-{self.airly.longitude}-{self.kind.lower()}"
+        return self._unique_id
 
     @property
     def unit_of_measurement(self):

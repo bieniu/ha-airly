@@ -65,9 +65,6 @@ async def async_setup_entry(hass, config_entry):
 
     await airly.async_update()
 
-    if not airly.data:
-        raise ConfigEntryNotReady()
-
     hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = airly
 
     config_entry.add_update_listener(update_listener)
