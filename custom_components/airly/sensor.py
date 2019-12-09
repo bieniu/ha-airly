@@ -131,15 +131,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
+    latitude = config_entry.data[CONF_LATITUDE]
+    longitude = config_entry.data[CONF_LONGITUDE]
 
     data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
 
-    if not data.data:
-        latitude = config_entry.data[CONF_LATITUDE]
-        longitude = config_entry.data[CONF_LONGITUDE]
-    else:
-        latitude = data.latitude
-        longitude = data.longitude
     sensors = []
     for sensor in SENSOR_TYPES:
         unique_id = f"{latitude}-{longitude}-{sensor.lower()}"
@@ -230,7 +226,7 @@ class AirlySensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return bool(self.airly.data)
+        return bool(self.data)
 
     async def async_update(self):
         """Get the data from Airly."""
