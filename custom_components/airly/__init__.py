@@ -24,7 +24,6 @@ from .const import (
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
     CONF_LANGUAGE,
-    DATA_CLIENT,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     NO_AIRLY_SENSORS,
@@ -36,7 +35,6 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
     """Set up configured Airly."""
     hass.data[DOMAIN] = {}
-    hass.data[DOMAIN][DATA_CLIENT] = {}
     return True
 
 
@@ -64,7 +62,7 @@ async def async_setup_entry(hass, config_entry):
 
     await airly.async_update()
 
-    hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = airly
+    hass.data[DOMAIN][config_entry.entry_id] = airly
 
     config_entry.add_update_listener(update_listener)
     hass.async_create_task(

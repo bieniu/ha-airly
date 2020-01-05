@@ -1,8 +1,9 @@
 """Support for the Airly service."""
+import logging
+
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
@@ -26,7 +27,6 @@ from .const import (
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
     CONF_LANGUAGE,
-    DATA_CLIENT,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
@@ -106,27 +106,11 @@ SENSOR_TYPES = {
     },
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_API_KEY, None): cv.string,
-        vol.Required(CONF_LATITUDE): cv.latitude,
-        vol.Required(CONF_LONGITUDE): cv.longitude,
-        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
-    }
-)
-
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Configure the platform and add the sensors."""
-    del config[CONF_SCAN_INTERVAL]
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
-        )
-    )
-
+    """Backward compatibility."""
+    _LOGGER.error("Airly integration doesn't support configuration.yaml config")
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
@@ -134,7 +118,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
 
-    data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+    data = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in SENSOR_TYPES:

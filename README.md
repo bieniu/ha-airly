@@ -8,7 +8,7 @@
 ## This integration is deprecated
 Home Assistant 0.101 and newer includes official Airly integration.
 Differences between the official and custom version:
-- no configurable `scan_interval`
+- no configurable `scan interval`
 - no API messages in Polish language
 - some sensors are represented in `air_quality` entity
 
@@ -17,37 +17,9 @@ These differences result from the requirements for official integrations. You ca
 ![Screenshot](https://github.com/bieniu/ha-airly/blob/master/images/airly-ha.png?raw=true)
 
 The integration collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
-You can add this to Home Assistant via `Configuration -> Integrations -> Add -> Airly` or `configuration.yaml` file. You can add this integration several times for different locations, e.g. home and work.
+You can add this to Home Assistant via `Configuration -> Integrations -> button with + sign -> Airly`. You can add this integration several times for different locations, e.g. home and work.
 
-To generate `api_key` go to [Airly for developers](https://developer.airly.eu/register) page.
-
-## Minimal configuration
-```yaml
-sensor:
-  - platform: airly
-    api_key: !secret airly_api_key
-```
-
-## Custom configuration example
-```yaml
-sensor:
-  - platform: airly
-    name: 'Air Quality'
-    api_key: !secret airly_api_key
-    latitude: !secret latitude
-    longitude: !secret longitude
-    language: 'pl'
-```
-
-## Arguments
-
-key | optional | type | default | description
--- | -- | -- | -- | --
-`name` | True | string | `Airly` | name of the sensors
-`api_key` | False | string | | Airly API key
-`latitude` | True | string | latitude from HA config | latitude of the location to monitor
-`longitude` | True | string | longitude from HA config | longitude of the location to monitor
-`language` | True | string | `en` | language, available `en` and `pl`
+To generate `API Key` go to [Airly for developers](https://developer.airly.eu/register) page.
 
 [releases]: https://github.com/bieniu/ha-airly/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
