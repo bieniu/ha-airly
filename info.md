@@ -1,3 +1,5 @@
+[![Community Forum][forum-shield]][forum]  [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]
+
 ## This integration is deprecated
 Home Assistant 0.101 and newer includes official Airly integration.
 Differences between the official and custom version:
@@ -41,5 +43,7 @@ key | optional | type | default | description
 `longitude` | True | string | longitude from HA config | longitude of the location to monitor
 `language` | True | string | `en` | language, available `en` and `pl`
 
-
-<a href="https://www.buymeacoffee.com/QnLdxeaqO" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+[forum]: https://community.home-assistant.io/t/airly-integration-air-quality-data/124996
+[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
+[buy-me-a-coffee-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Buy%20me%20a%20coffee&color=6f4e37&logo=buy%20me%20a%20coffee&logoColor=white
+[buy-me-a-coffee]: https://www.buymeacoffee.com/QnLdxeaqO
