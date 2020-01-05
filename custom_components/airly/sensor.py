@@ -1,24 +1,19 @@
 """Support for the Airly service."""
 import logging
 
-import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
-    CONF_API_KEY,
     CONF_LATITUDE,
     CONF_LONGITUDE,
     CONF_NAME,
-    CONF_SCAN_INTERVAL,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_PRESSURE,
     DEVICE_CLASS_TEMPERATURE,
     PRESSURE_HPA,
     TEMP_CELSIUS,
 )
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 
 from .const import (
@@ -26,12 +21,7 @@ from .const import (
     ATTR_CAQI_ADVICE,
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
-    CONF_LANGUAGE,
-    DEFAULT_LANGUAGE,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    LANGUAGE_CODES,
 )
 
 ATTR_ICON = "icon"
