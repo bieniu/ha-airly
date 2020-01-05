@@ -1,7 +1,6 @@
 """Support for the Airly service."""
 import logging
 
-from homeassistant import config_entries
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
