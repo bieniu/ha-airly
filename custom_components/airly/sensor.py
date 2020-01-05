@@ -139,14 +139,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     sensors = []
     for sensor in SENSOR_TYPES:
         unique_id = f"{latitude}-{longitude}-{sensor.lower()}"
-        sensors.append(AirlySensor(data, name, sensor, unique_id=unique_id))
+        sensors.append(AirlySensor(data, name, sensor, unique_id))
     async_add_entities(sensors, True)
 
 
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, airly, name, kind, unique_id=None):
+    def __init__(self, airly, name, kind, unique_id):
         """Initialize."""
         self.airly = airly
         self.data = airly.data
