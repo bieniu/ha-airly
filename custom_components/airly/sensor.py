@@ -108,9 +108,11 @@ SENSOR_TYPES = {
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Backward compatibility."""
     _LOGGER.error("Airly integration doesn't support configuration.yaml config")
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
