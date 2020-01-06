@@ -21,7 +21,6 @@ import homeassistant.helpers.config_validation as cv
 from .const import (
     CONF_LANGUAGE,
     DEFAULT_LANGUAGE,
-    DEFAULT_NAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LANGUAGE_CODES,
@@ -73,7 +72,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 )
 
         return self._show_config_form(
-            name=DEFAULT_NAME,
+            name=self.hass.config.location_name,
             api_key="",
             latitude=self.hass.config.latitude,
             longitude=self.hass.config.longitude,
