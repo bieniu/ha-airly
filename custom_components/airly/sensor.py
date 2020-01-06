@@ -4,8 +4,6 @@ import logging
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
-    CONF_LATITUDE,
-    CONF_LONGITUDE,
     CONF_NAME,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_PRESSURE,
