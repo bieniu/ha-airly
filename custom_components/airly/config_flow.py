@@ -31,14 +31,6 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-@callback
-def configured_instances(hass):
-    """Return a set of configured Airly instances."""
-    return set(
-        entry.data[CONF_NAME] for entry in hass.config_entries.async_entries(DOMAIN)
-    )
-
-
 class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Airly."""
 
@@ -56,17 +48,21 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         websession = async_get_clientsession(self.hass)
 
         if user_input is not None:
-            if user_input[CONF_NAME] in configured_instances(self.hass):
-                self._errors[CONF_NAME] = "name_exists"
-            api_key_valid = await self._test_api_key(websession, user_input["api_key"])
+            await self.async_set_unique_id(
+                f"{user_input[CONF_LATITUDE]}-{user_input[CONF_LONGITUDE]}"
+            )
+            self._abort_if_unique_id_configured()
+            api_key_valid = await self._test_api_key(
+                websession, user_input[CONF_API_KEY]
+            )
             if not api_key_valid:
                 self._errors["base"] = "auth"
             else:
                 location_valid = await self._test_location(
                     websession,
-                    user_input["api_key"],
-                    user_input["latitude"],
-                    user_input["longitude"],
+                    user_input[CONF_API_KEY],
+                    user_input[CONF_LATITUDE],
+                    user_input[CONF_LONGITUDE],
                 )
                 if not location_valid:
                     self._errors["base"] = "wrong_location"

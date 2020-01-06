@@ -106,14 +106,12 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
-    latitude = config_entry.data[CONF_LATITUDE]
-    longitude = config_entry.data[CONF_LONGITUDE]
 
     data = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in SENSOR_TYPES:
-        unique_id = f"{latitude}-{longitude}-{sensor.lower()}"
+        unique_id = f"{config_entry.unique_id}-{sensor.lower()}"
         sensors.append(AirlySensor(data, name, sensor, unique_id))
     async_add_entities(sensors, True)
 

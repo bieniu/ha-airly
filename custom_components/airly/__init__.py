@@ -44,6 +44,13 @@ async def async_setup_entry(hass, config_entry):
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data[CONF_LANGUAGE]
+
+    # For backwards compat, set unique ID
+    if config_entry.unique_id is None:
+        hass.config_entries.async_update_entry(
+            config_entry, unique_id=f"{latitude}-{longitude}"
+        )
+
     try:
         scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
     except KeyError:
