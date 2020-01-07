@@ -1,6 +1,4 @@
 """Support for the Airly service."""
-import logging
-
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
@@ -92,9 +90,6 @@ SENSOR_TYPES = {
         ATTR_UNIT: TEMP_CELSIUS,
     },
 }
-
-_LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """"Old way of setting up Airly integrations."""
