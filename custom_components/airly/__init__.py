@@ -33,13 +33,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
-    """Set up configured Airly."""
-    hass.data[DOMAIN] = {}
+    """"Old way of setting up Airly integrations."""
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up Airly as config entry."""
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
     api_key = config_entry.data[CONF_API_KEY]
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]

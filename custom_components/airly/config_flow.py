@@ -94,7 +94,7 @@ class AirlyFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(
                         CONF_LONGITUDE, default=self.hass.config.longitude
                     ): cv.longitude,
-                    vol.Optional(CONF_NAME, default=name): str,
+                    vol.Optional(CONF_NAME, default=self.hass.config.latitude): str,
                     vol.Optional(CONF_LANGUAGE, default=language): vol.In(
                         LANGUAGE_CODES
                     ),
