@@ -91,8 +91,10 @@ SENSOR_TYPES = {
     },
 }
 
+
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """"Old way of setting up Airly integrations."""
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
