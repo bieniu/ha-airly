@@ -24,7 +24,6 @@ from .const import (
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
     CONF_LANGUAGE,
-    DATA_CLIENT,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     NO_AIRLY_SENSORS,
@@ -34,18 +33,26 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass: HomeAssistant, config: Config) -> bool:
-    """Set up configured Airly."""
-    hass.data[DOMAIN] = {}
-    hass.data[DOMAIN][DATA_CLIENT] = {}
+    """"Old way of setting up Airly integrations."""
     return True
 
 
 async def async_setup_entry(hass, config_entry):
     """Set up Airly as config entry."""
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+
     api_key = config_entry.data[CONF_API_KEY]
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data[CONF_LANGUAGE]
+
+    # For backwards compat, set unique ID
+    if config_entry.unique_id is None:
+        hass.config_entries.async_update_entry(
+            config_entry, unique_id=f"{latitude}-{longitude}"
+        )
+
     try:
         scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
     except KeyError:
@@ -64,7 +71,7 @@ async def async_setup_entry(hass, config_entry):
 
     await airly.async_update()
 
-    hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id] = airly
+    hass.data[DOMAIN][config_entry.entry_id] = airly
 
     config_entry.add_update_listener(update_listener)
     hass.async_create_task(

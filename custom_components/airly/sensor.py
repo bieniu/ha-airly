@@ -1,23 +1,14 @@
 """Support for the Airly service."""
-import voluptuous as vol
-
-from homeassistant import config_entries
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     ATTR_DEVICE_CLASS,
-    CONF_API_KEY,
-    CONF_LATITUDE,
-    CONF_LONGITUDE,
     CONF_NAME,
-    CONF_SCAN_INTERVAL,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_PRESSURE,
     DEVICE_CLASS_TEMPERATURE,
     PRESSURE_HPA,
     TEMP_CELSIUS,
 )
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 
 from .const import (
@@ -25,13 +16,7 @@ from .const import (
     ATTR_CAQI_ADVICE,
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
-    CONF_LANGUAGE,
-    DATA_CLIENT,
-    DEFAULT_LANGUAGE,
-    DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    LANGUAGE_CODES,
 )
 
 ATTR_ICON = "icon"
@@ -106,39 +91,20 @@ SENSOR_TYPES = {
     },
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_API_KEY, None): cv.string,
-        vol.Required(CONF_LATITUDE): cv.latitude,
-        vol.Required(CONF_LONGITUDE): cv.longitude,
-        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(LANGUAGE_CODES),
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
-    }
-)
-
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Configure the platform and add the sensors."""
-    del config[CONF_SCAN_INTERVAL]
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=config
-        )
-    )
+    """"Old way of setting up Airly integrations."""
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
-    latitude = config_entry.data[CONF_LATITUDE]
-    longitude = config_entry.data[CONF_LONGITUDE]
 
-    data = hass.data[DOMAIN][DATA_CLIENT][config_entry.entry_id]
+    data = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in SENSOR_TYPES:
-        unique_id = f"{latitude}-{longitude}-{sensor.lower()}"
+        unique_id = f"{config_entry.unique_id}-{sensor.lower()}"
         sensors.append(AirlySensor(data, name, sensor, unique_id))
     async_add_entities(sensors, True)
 
