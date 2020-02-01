@@ -1,4 +1,5 @@
 # Airly
+
 [![GitHub Release][releases-shield]][releases]
 [![GitHub All Releases][downloads-total-shield]][releases]
 [![hacs_badge][hacs-shield]][hacs]
@@ -6,8 +7,10 @@
 [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]
 
 ## This integration is deprecated
+
 Home Assistant 0.101 and newer includes official Airly integration.
 Differences between the official and custom version:
+
 - no configurable `scan interval`
 - no API messages in Polish language
 - some sensors are represented in `air_quality` entity
@@ -19,7 +22,11 @@ These differences result from the requirements for official integrations. You ca
 The integration collects data about air quality from [Airly](https://airly.eu) and present as sensors in Home Assitant.
 You can add this to Home Assistant via `Configuration -> Integrations -> button with + sign -> Airly`. You can add this integration several times for different locations, e.g. home and work.
 
+## API Key
+
 To generate `API Key` go to [Airly for developers](https://developer.airly.eu/register) page.
+
+**Airly allows 100 requests per day. Default scan interval of the integration is 15 minutes (96 requests per day). If you want use more than one instance of the integration you have to change scan interval via config flow options to not exceed allowed number of requests.**
 
 [releases]: https://github.com/bieniu/ha-airly/releases
 [releases-shield]: https://img.shields.io/github/release/bieniu/ha-airly.svg?style=popout
