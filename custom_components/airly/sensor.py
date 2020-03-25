@@ -92,30 +92,26 @@ SENSOR_TYPES = {
 }
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """"Old way of setting up Airly integrations."""
-
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    data = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     sensors = []
     for sensor in SENSOR_TYPES:
         unique_id = f"{config_entry.unique_id}-{sensor.lower()}"
-        sensors.append(AirlySensor(data, name, sensor, unique_id))
-    async_add_entities(sensors, True)
+        sensors.append(AirlySensor(coordinator, name, sensor, unique_id))
+
+    async_add_entities(sensors, False)
 
 
 class AirlySensor(Entity):
     """Define an Airly sensor."""
 
-    def __init__(self, airly, name, kind, unique_id):
+    def __init__(self, coordinator, name, kind, unique_id):
         """Initialize."""
-        self.airly = airly
-        self.data = airly.data
+        self.coordinator = coordinator
         self._name = name
         self.kind = kind
         self._device_class = None
@@ -123,7 +119,7 @@ class AirlySensor(Entity):
         self._icon = None
         self._unique_id = unique_id
         self._unit_of_measurement = None
-        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION[self.airly.language]}
+        self._attrs = {ATTR_ATTRIBUTION: ATTRIBUTION[self.coordinator.language]}
 
     @property
     def name(self):
@@ -131,9 +127,14 @@ class AirlySensor(Entity):
         return f"{self._name} {SENSOR_TYPES[self.kind][ATTR_LABEL]}"
 
     @property
+    def should_poll(self):
+        """Return the polling requirement of the entity."""
+        return False
+
+    @property
     def state(self):
         """Return the state."""
-        self._state = self.data[self.kind]
+        self._state = self.coordinator.data[self.kind]
         if self.kind in [ATTR_PM1, ATTR_PM25, ATTR_PM10, ATTR_PRESSURE, ATTR_CAQI]:
             self._state = round(self._state)
         if self.kind in [ATTR_TEMPERATURE, ATTR_HUMIDITY]:
@@ -144,15 +145,15 @@ class AirlySensor(Entity):
     def device_state_attributes(self):
         """Return the state attributes."""
         if self.kind == ATTR_CAQI_DESCRIPTION:
-            self._attrs[ATTR_CAQI_ADVICE] = self.data[ATTR_CAQI_ADVICE]
+            self._attrs[ATTR_CAQI_ADVICE] = self.coordinator.data[ATTR_CAQI_ADVICE]
         if self.kind == ATTR_CAQI:
-            self._attrs[ATTR_CAQI_LEVEL] = self.data[ATTR_CAQI_LEVEL]
+            self._attrs[ATTR_CAQI_LEVEL] = self.coordinator.data[ATTR_CAQI_LEVEL]
         if self.kind == ATTR_PM25:
-            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM25_LIMIT]
-            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM25_PERCENT])
+            self._attrs[ATTR_LIMIT] = self.coordinator.data[ATTR_PM25_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.coordinator.data[ATTR_PM25_PERCENT])
         if self.kind == ATTR_PM10:
-            self._attrs[ATTR_LIMIT] = self.data[ATTR_PM10_LIMIT]
-            self._attrs[ATTR_PERCENT] = round(self.data[ATTR_PM10_PERCENT])
+            self._attrs[ATTR_LIMIT] = self.coordinator.data[ATTR_PM10_LIMIT]
+            self._attrs[ATTR_PERCENT] = round(self.coordinator.data[ATTR_PM10_PERCENT])
         return self._attrs
 
     @property
@@ -192,11 +193,16 @@ class AirlySensor(Entity):
     @property
     def available(self):
         """Return True if entity is available."""
-        return bool(self.data)
+        return self.coordinator.last_update_success
+
+    async def async_added_to_hass(self):
+        """Connect to dispatcher listening for entity data notifications."""
+        self.coordinator.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self):
+        """Disconnect from update signal."""
+        self.coordinator.async_remove_listener(self.async_write_ha_state)
 
     async def async_update(self):
-        """Get the data from Airly."""
-        await self.airly.async_update()
-
-        if self.airly.data:
-            self.data = self.airly.data
+        """Update Airly entity."""
+        await self.coordinator.async_request_refresh()

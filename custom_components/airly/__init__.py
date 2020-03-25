@@ -1,5 +1,4 @@
 """The Airly component."""
-from asyncio import TimeoutError
 from datetime import timedelta
 import logging
 
@@ -16,7 +15,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.util import Throttle
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     ATTR_CAQI,
@@ -39,9 +38,6 @@ async def async_setup(hass: HomeAssistant, config: Config) -> bool:
 
 async def async_setup_entry(hass, config_entry):
     """Set up Airly as config entry."""
-    if DOMAIN not in hass.data:
-        hass.data[DOMAIN] = {}
-
     api_key = config_entry.data[CONF_API_KEY]
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
@@ -54,24 +50,19 @@ async def async_setup_entry(hass, config_entry):
         )
 
     try:
-        scan_interval = config_entry.options[CONF_SCAN_INTERVAL]
+        scan_interval = timedelta(seconds=config_entry.options[CONF_SCAN_INTERVAL])
     except KeyError:
-        scan_interval = DEFAULT_SCAN_INTERVAL
+        scan_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
 
     websession = async_get_clientsession(hass)
 
-    airly = AirlyData(
-        websession,
-        api_key,
-        latitude,
-        longitude,
-        language,
-        scan_interval=timedelta(seconds=scan_interval),
+    coordinator = AirlyDataUpdateCoordinator(
+        hass, websession, api_key, latitude, longitude, language, scan_interval
     )
+    await coordinator.async_refresh()
 
-    await airly.async_update()
-
-    hass.data[DOMAIN][config_entry.entry_id] = airly
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][config_entry.entry_id] = coordinator
 
     config_entry.add_update_listener(update_listener)
     hass.async_create_task(
@@ -86,53 +77,53 @@ async def async_unload_entry(hass, config_entry):
     return True
 
 
-async def update_listener(hass, entry):
+async def update_listener(hass, config_entry):
     """Update listener."""
-    await hass.config_entries.async_forward_entry_unload(entry, "sensor")
-    hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
+    hass.data[DOMAIN].pop(config_entry.entry_id)
+    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
+    hass.async_add_job(async_setup_entry(hass, config_entry))
 
 
-class AirlyData:
-    """Define an object to hold sensor data."""
+class AirlyDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching Airly data API."""
 
-    def __init__(self, session, api_key, latitude, longitude, language, **kwargs):
+    def __init__(
+        self, hass, session, api_key, latitude, longitude, language, scan_interval
+    ):
         """Initialize."""
+        self.airly = Airly(api_key, session, language=language)
+        self.language = language
         self.latitude = latitude
         self.longitude = longitude
-        self.language = language
-        self.airly = Airly(api_key, session, language=self.language)
-        self.data = {}
 
-        self.async_update = Throttle(kwargs[CONF_SCAN_INTERVAL])(self._async_update)
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=scan_interval)
 
-    async def _async_update(self):
-        """Update Airly data."""
-        try:
-            with timeout(20):
-                measurements = self.airly.create_measurements_session_point(
-                    self.latitude, self.longitude
-                )
+
+    async def _async_update_data(self):
+        """Update data via library."""
+        data = {}
+        with timeout(20):
+            measurements = self.airly.create_measurements_session_point(
+                self.latitude, self.longitude
+            )
+            try:
                 await measurements.update()
+            except (AirlyError, ClientConnectorError) as error:
+                raise UpdateFailed(error)
 
-            values = measurements.current["values"]
-            standards = measurements.current["standards"]
-            index = measurements.current["indexes"][0]
+        values = measurements.current["values"]
+        index = measurements.current["indexes"][0]
+        standards = measurements.current["standards"]
 
-            if index["description"] == NO_AIRLY_SENSORS[self.language]:
-                _LOGGER.error("Can't retrieve data: no Airly sensors in this area")
-                return
-            for value in values:
-                self.data[value["name"]] = value["value"]
-            for standard in standards:
-                self.data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
-                self.data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
-            self.data[ATTR_CAQI] = index["value"]
-            self.data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
-            self.data[ATTR_CAQI_DESCRIPTION] = index["description"]
-            self.data[ATTR_CAQI_ADVICE] = index["advice"]
-            _LOGGER.debug("Data retrieved from Airly")
-        except TimeoutError:
-            _LOGGER.error("Asyncio Timeout Error")
-        except (ValueError, AirlyError, ClientConnectorError) as error:
-            _LOGGER.error(error)
-            self.data = {}
+        if index["description"] == NO_AIRLY_SENSORS:
+            raise UpdateFailed("Can't retrieve data: no Airly sensors in this area")
+        for value in values:
+            data[value["name"]] = value["value"]
+        for standard in standards:
+            data[f"{standard['pollutant']}_LIMIT"] = standard["limit"]
+            data[f"{standard['pollutant']}_PERCENT"] = standard["percent"]
+        data[ATTR_CAQI] = index["value"]
+        data[ATTR_CAQI_LEVEL] = index["level"].lower().replace("_", " ")
+        data[ATTR_CAQI_DESCRIPTION] = index["description"]
+        data[ATTR_CAQI_ADVICE] = index["advice"]
+        return data
