@@ -14,8 +14,8 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 from homeassistant.core import Config, HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -101,7 +101,6 @@ class AirlyDataUpdateCoordinator(DataUpdateCoordinator):
         self.longitude = longitude
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=scan_interval)
-
 
     async def _async_update_data(self):
         """Update data via library."""
