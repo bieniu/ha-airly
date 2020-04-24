@@ -196,7 +196,9 @@ class AirlySensor(Entity):
 
     async def async_added_to_hass(self):
         """Connect to dispatcher listening for entity data notifications."""
-        self.async_on_remove(self.coordinator.async_add_listener(self.async_write_ha_state))
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
 
     async def async_update(self):
         """Update Airly entity."""
