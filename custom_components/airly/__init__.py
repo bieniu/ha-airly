@@ -83,9 +83,7 @@ async def async_unload_entry(hass, config_entry):
 
 async def update_listener(hass, config_entry):
     """Update listener."""
-    hass.data[DOMAIN].pop(config_entry.entry_id)
-    await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
-    hass.async_add_job(async_setup_entry(hass, config_entry))
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
 
 class AirlyDataUpdateCoordinator(DataUpdateCoordinator):
