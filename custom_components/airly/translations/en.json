@@ -1,10 +1,9 @@
 {
   "config": {
-    "title": "Airly",
     "step": {
       "user": {
         "title": "Airly",
-        "description": "Set up Airly air quality integration. To generate API key go to https://developer.airly.eu/register",
+        "description": "Set up Airly air quality integration. To generate API key go to https://developer.airly.eu/registers \n\n It is recommended to use the official version of integration, go to: https://www.home-assistant.io/integrations/airly/",
         "data": {
           "name": "Name of the integration",
           "api_key": "Airly API key",

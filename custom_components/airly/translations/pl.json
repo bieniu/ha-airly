@@ -1,10 +1,9 @@
 {
   "config": {
-    "title": "Airly",
     "step": {
       "user": {
         "title": "Airly",
-        "description": "Konfiguracja integracji Airly. By wygenerować klucz API przejdź na stronę https://developer.airly.eu/register",
+        "description": "Konfiguracja integracji Airly. By wygenerować klucz API przejdź na stronę https://developer.airly.eu/register \n\n Zalecane jest używanie oficjalnej wersji integracji, przejdź do: https://www.home-assistant.io/integrations/airly/",
         "data": {
           "name": "Nazwa integracji",
           "api_key": "Klucz API Airly",
