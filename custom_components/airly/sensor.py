@@ -18,6 +18,7 @@ from .const import (
     ATTR_CAQI_ADVICE,
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
+    COORDINATOR,
     DOMAIN,
 )
 
@@ -95,7 +96,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add a Airly entities from a config_entry."""
     name = config_entry.data[CONF_NAME]
 
-    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id][COORDINATOR]
 
     sensors = []
     for sensor in SENSOR_TYPES:
