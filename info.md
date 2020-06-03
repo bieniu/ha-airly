@@ -1,4 +1,4 @@
-[![Community Forum][forum-shield]][forum]  [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]
+[![Community Forum][forum-shield]][forum]  [![Buy me a coffee][buy-me-a-coffee-shield]][buy-me-a-coffee]  [![PayPal_Me][paypal-me-shield]][paypal-me]
 
 ## This integration is deprecated
 
@@ -25,3 +25,5 @@ To generate `API Key` go to [Airly for developers](https://developer.airly.eu/re
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=popout
 [buy-me-a-coffee-shield]: https://img.shields.io/static/v1.svg?label=%20&message=Buy%20me%20a%20coffee&color=6f4e37&logo=buy%20me%20a%20coffee&logoColor=white
 [buy-me-a-coffee]: https://www.buymeacoffee.com/QnLdxeaqO
+[paypal-me-shield]: https://img.shields.io/static/v1.svg?label=%20&message=PayPal.Me&logo=paypal
+[paypal-me]: https://www.paypal.me/bieniu79
