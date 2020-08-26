@@ -19,7 +19,9 @@ from .const import (
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
     COORDINATOR,
+    DEFAULT_NAME,
     DOMAIN,
+    MANUFACTURER,
 )
 
 ATTR_ICON = "icon"
@@ -125,6 +127,18 @@ class AirlySensor(Entity):
     def name(self):
         """Return the name."""
         return f"{self._name} {SENSOR_TYPES[self.kind][ATTR_LABEL]}"
+
+    @property
+    def device_info(self):
+        """Return the device info."""
+        return {
+            "identifiers": {
+                (DOMAIN, self.coordinator.latitude, self.coordinator.longitude)
+            },
+            "name": DEFAULT_NAME,
+            "manufacturer": MANUFACTURER,
+            "entry_type": "service",
+        }
 
     @property
     def should_poll(self):

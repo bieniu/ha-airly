@@ -8,8 +8,10 @@ CONF_LANGUAGE = "language"
 
 COORDINATOR = "coordinator"
 DEFAULT_LANGUAGE = "en"
+DEFAULT_NAME = "Airly"
 DEFAULT_SCAN_INTERVAL = 900
 DOMAIN = "airly"
+MANUFACTURER = "Airly sp. z o.o."
 UNDO_UPDATE_LISTENER = "undo_update_listener"
 
 LANGUAGE_CODES = ["en", "pl"]
