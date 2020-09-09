@@ -139,11 +139,6 @@ class AirlySensor(CoordinatorEntity):
         }
 
     @property
-    def should_poll(self):
-        """Return the polling requirement of the entity."""
-        return False
-
-    @property
     def state(self):
         """Return the state."""
         self._state = self.coordinator.data[self.kind]
@@ -202,17 +197,3 @@ class AirlySensor(CoordinatorEntity):
         """Return the unit the value is expressed in."""
         return SENSOR_TYPES[self.kind][ATTR_UNIT]
 
-    @property
-    def available(self):
-        """Return True if entity is available."""
-        return self.coordinator.last_update_success
-
-    async def async_added_to_hass(self):
-        """Connect to dispatcher listening for entity data notifications."""
-        self.async_on_remove(
-            self.coordinator.async_add_listener(self.async_write_ha_state)
-        )
-
-    async def async_update(self):
-        """Update Airly entity."""
-        await self.coordinator.async_request_refresh()
