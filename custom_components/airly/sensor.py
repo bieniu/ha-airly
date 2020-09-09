@@ -196,4 +196,3 @@ class AirlySensor(CoordinatorEntity):
     def unit_of_measurement(self):
         """Return the unit the value is expressed in."""
         return SENSOR_TYPES[self.kind][ATTR_UNIT]
-
