@@ -134,7 +134,7 @@ class AirlyDataUpdateCoordinator(DataUpdateCoordinator):
             try:
                 await measurements.update()
             except (AirlyError, ClientConnectorError) as error:
-                raise UpdateFailed(error)
+                raise UpdateFailed(error) from error
 
         values = measurements.current["values"]
         index = measurements.current["indexes"][0]
