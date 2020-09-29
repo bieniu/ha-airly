@@ -4,6 +4,6 @@
   "documentation": "https://github.com/bieniu/ha-airly",
   "dependencies": [],
   "codeowners": ["@bieniu"],
-  "requirements": ["airly==0.0.2"],
+  "requirements": ["airly==1.0.0"],
   "config_flow": true
 }
