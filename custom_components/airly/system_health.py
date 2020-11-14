@@ -1,8 +1,8 @@
 """Provide info to system health."""
+from airly import Airly
+
 from homeassistant.components import system_health
 from homeassistant.core import HomeAssistant, callback
-
-from .const import DOMAIN
 
 
 @callback
@@ -15,10 +15,8 @@ def async_register(
 
 async def system_health_info(hass):
     """Get info for the info page."""
-    client = hass.data[DOMAIN]
-
     return {
         "can_reach_server": system_health.async_check_can_reach_url(
-            hass, client.AIRLY_API_URL
+            hass, Airly.AIRLY_API_URL
         )
     }
