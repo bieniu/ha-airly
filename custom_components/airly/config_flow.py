@@ -1,6 +1,4 @@
 """Adds config flow for Airly."""
-import logging
-
 from airly import Airly
 from airly.exceptions import AirlyError
 import async_timeout
