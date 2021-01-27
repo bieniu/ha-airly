@@ -25,6 +25,7 @@ from .const import (
     ATTR_CAQI_DESCRIPTION,
     ATTR_CAQI_LEVEL,
     CONF_LANGUAGE,
+    CONF_USE_NEAREST,
     COORDINATOR,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
@@ -48,6 +49,7 @@ async def async_setup_entry(hass, config_entry):
     latitude = config_entry.data[CONF_LATITUDE]
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data[CONF_LANGUAGE]
+    use_nearest = config_entry.data.get(CONF_USE_NEAREST, False)
 
     # For backwards compat, set unique ID
     if config_entry.unique_id is None:
@@ -63,7 +65,14 @@ async def async_setup_entry(hass, config_entry):
     websession = async_get_clientsession(hass)
 
     coordinator = AirlyDataUpdateCoordinator(
-        hass, websession, api_key, latitude, longitude, language, scan_interval
+        hass,
+        websession,
+        api_key,
+        latitude,
+        longitude,
+        language,
+        scan_interval,
+        use_nearest,
     )
     await coordinator.async_refresh()
 
@@ -114,23 +123,37 @@ class AirlyDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching Airly data API."""
 
     def __init__(
-        self, hass, session, api_key, latitude, longitude, language, scan_interval
+        self,
+        hass,
+        session,
+        api_key,
+        latitude,
+        longitude,
+        language,
+        scan_interval,
+        use_nearest,
     ):
         """Initialize."""
         self.airly = Airly(api_key, session, language=language)
         self.language = language
         self.latitude = latitude
         self.longitude = longitude
+        self.use_nearest = use_nearest
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=scan_interval)
 
     async def _async_update_data(self):
         """Update data via library."""
         data = {}
-        with timeout(20):
+        if self.use_nearest:
+            measurements = self.airly.create_measurements_session_nearest(
+                self.latitude, self.longitude, max_distance_km=5
+            )
+        else:
             measurements = self.airly.create_measurements_session_point(
                 self.latitude, self.longitude
             )
+        with timeout(20):
             try:
                 await measurements.update()
             except (AirlyError, ClientConnectorError) as error:

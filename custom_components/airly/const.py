@@ -5,6 +5,7 @@ ATTR_CAQI_DESCRIPTION = "DESCRIPTION"
 ATTR_CAQI_LEVEL = "level"
 
 CONF_LANGUAGE = "language"
+CONF_USE_NEAREST = "use_nearest"
 
 COORDINATOR = "coordinator"
 DEFAULT_LANGUAGE = "en"
