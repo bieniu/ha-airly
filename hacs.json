@@ -1,6 +1,6 @@
 {
   "name": "Airly",
-  "homeassistant": "0.118.0",
+  "homeassistant": "2021.2.0",
   "iot_class": "cloud_poll",
   "domains": ["sensor"],
   "zip_release": true,
